@@ -4,7 +4,7 @@
   <title><![CDATA[Sean's Blog]]></title>
   <link href="http://seanguo.github.io/atom.xml" rel="self"/>
   <link href="http://seanguo.github.io/"/>
-  <updated>2013-11-26T18:23:38+08:00</updated>
+  <updated>2013-11-26T20:32:41+08:00</updated>
   <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -18,7 +18,7 @@
     <link href="http://seanguo.github.io/blog/2013/11/26/hello-world/"/>
     <updated>2013-11-26T15:42:16+08:00</updated>
     <id>http://seanguo.github.io/blog/2013/11/26/hello-world</id>
-    <content type="html"><![CDATA[
+    <content type="html"><![CDATA[<p>Thanks <a href="http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/">http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/</a> I got this blog system working.</p>
 ]]></content>
   </entry>
   
