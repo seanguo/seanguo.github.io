@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Sean's Blog]]></title>
-  <link href="http://seanguo.github.io/atom.xml" rel="self"/>
+  <title><![CDATA[Category: Chef | Sean's Blog]]></title>
+  <link href="http://seanguo.github.io/blog/categories/chef/atom.xml" rel="self"/>
   <link href="http://seanguo.github.io/"/>
   <updated>2013-11-26T21:14:00+08:00</updated>
   <id>http://seanguo.github.io/</id>
@@ -73,15 +73,6 @@
 <li><a href="http://rubydoc.info/gems/chef/11.6.0/frames">http://rubydoc.info/gems/chef/11.6.0/frames</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Hello World]]></title>
-    <link href="http://seanguo.github.io/blog/2013/11/26/hello-world/"/>
-    <updated>2013-11-26T15:42:16+08:00</updated>
-    <id>http://seanguo.github.io/blog/2013/11/26/hello-world</id>
-    <content type="html"><![CDATA[<p>Thanks <a href="http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/">http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/</a> I got this blog system working.</p>
 ]]></content>
   </entry>
   
