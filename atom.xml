@@ -4,7 +4,7 @@
   <title><![CDATA[Sean's Blog]]></title>
   <link href="http://seanguo.github.io/atom.xml" rel="self"/>
   <link href="http://seanguo.github.io/"/>
-  <updated>2013-11-27T19:37:44+08:00</updated>
+  <updated>2013-11-27T19:51:14+08:00</updated>
   <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -12,6 +12,20 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Itunes的备份之后的文件在哪儿]]></title>
+    <link href="http://seanguo.github.io/blog/2013/11/27/itunes-backup-location/"/>
+    <updated>2013-11-27T19:46:51+08:00</updated>
+    <id>http://seanguo.github.io/blog/2013/11/27/itunes-backup-location</id>
+    <content type="html"><![CDATA[<ul>
+<li><p><strong>Windows 7</strong>的在 C:/Users/[用户名]/AppData/Roaming/Apple Computer/MobileSync/Backup/</p></li>
+<li><p><strong>Windows XP</strong>: C:/Documents and Settings(用户名)/Application Data/Apple Computer/MobileSync/Backup</p></li>
+<li><p><strong>Mac</strong> 中：~/Library/Application Support/MobileSync/Backup</p></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[NoSql Database Compare]]></title>
