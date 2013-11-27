@@ -4,7 +4,7 @@
   <title><![CDATA[Sean's Blog]]></title>
   <link href="http://seanguo.github.io/atom.xml" rel="self"/>
   <link href="http://seanguo.github.io/"/>
-  <updated>2013-11-26T21:14:00+08:00</updated>
+  <updated>2013-11-27T09:43:04+08:00</updated>
   <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -12,6 +12,21 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[My Ruby Learning]]></title>
+    <link href="http://seanguo.github.io/blog/2013/11/27/my-ruby-learning/"/>
+    <updated>2013-11-27T09:39:36+08:00</updated>
+    <id>http://seanguo.github.io/blog/2013/11/27/my-ruby-learning</id>
+    <content type="html"><![CDATA[
+
+<figure class='code'><figcaption><span>Output something</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="s2">&quot;/Users/sean/Desktop/test.rb&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Materials to Learn Chef]]></title>
