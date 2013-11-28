@@ -19,7 +19,7 @@ date_format: "ordinal"
 subscribe_rss: /atom.xml
 subscribe_email:
 # RSS feeds can list your email address if you like
-email:
+email: seanguo85@qq.com
 
 # ----------------------- #
 #    Jekyll & Plugins     #
@@ -98,3 +98,9 @@ google_analytics_tracking_id:
 
 # Facebook Like
 facebook_like: false
+social:
+  title: Follow me at
+  facebook: sguo@voxeo.com
+  github: seanguo
+  twitter: seanguo
+  linkedin: seanguo85@qq.com
