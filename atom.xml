@@ -4,17 +4,17 @@
   <title><![CDATA[Sean's Blog]]></title>
   <link href="http://seanguo.github.io/atom.xml" rel="self"/>
   <link href="http://seanguo.github.io/"/>
-  <updated>2013-11-28T09:57:31+08:00</updated>
+  <updated>2013-11-28T13:16:49+08:00</updated>
   <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
-    
+    <email><![CDATA[seanguo85@qq.com]]></email>
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
   
   <entry>
-    <title type="html"><![CDATA[Itunes的备份之后的文件在哪儿]]></title>
+    <title type="html"><![CDATA[itunes的备份之后的文件在哪儿]]></title>
     <link href="http://seanguo.github.io/blog/2013/11/27/itunes-backup-location/"/>
     <updated>2013-11-27T19:46:51+08:00</updated>
     <id>http://seanguo.github.io/blog/2013/11/27/itunes-backup-location</id>
@@ -28,7 +28,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[NoSql Database Compare]]></title>
+    <title type="html"><![CDATA[NoSql database compare]]></title>
     <link href="http://seanguo.github.io/blog/2013/11/27/nosql-database-compare/"/>
     <updated>2013-11-27T16:47:57+08:00</updated>
     <id>http://seanguo.github.io/blog/2013/11/27/nosql-database-compare</id>
@@ -1127,7 +1127,7 @@ First, start the MongoDB server in one terminal:</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[My Ruby Learning]]></title>
+    <title type="html"><![CDATA[My Ruby learning]]></title>
     <link href="http://seanguo.github.io/blog/2013/11/27/my-ruby-learning/"/>
     <updated>2013-11-27T09:39:36+08:00</updated>
     <id>http://seanguo.github.io/blog/2013/11/27/my-ruby-learning</id>
@@ -1142,7 +1142,7 @@ First, start the MongoDB server in one terminal:</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Materials to Learn Chef]]></title>
+    <title type="html"><![CDATA[Materials to learn Chef]]></title>
     <link href="http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef/"/>
     <updated>2013-11-26T20:57:31+08:00</updated>
     <id>http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef</id>

@@ -1,20 +1,20 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Category: Nosql | Sean's Blog]]></title>
+  <title><![CDATA[Category: nosql | Sean's Blog]]></title>
   <link href="http://seanguo.github.io/blog/categories/nosql/atom.xml" rel="self"/>
   <link href="http://seanguo.github.io/"/>
-  <updated>2013-11-28T09:57:31+08:00</updated>
+  <updated>2013-11-28T13:16:49+08:00</updated>
   <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
-    
+    <email><![CDATA[seanguo85@qq.com]]></email>
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
   
   <entry>
-    <title type="html"><![CDATA[NoSql Database Compare]]></title>
+    <title type="html"><![CDATA[NoSql database compare]]></title>
     <link href="http://seanguo.github.io/blog/2013/11/27/nosql-database-compare/"/>
     <updated>2013-11-27T16:47:57+08:00</updated>
     <id>http://seanguo.github.io/blog/2013/11/27/nosql-database-compare</id>
