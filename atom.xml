@@ -4,7 +4,7 @@
   <title><![CDATA[Sean's Blog]]></title>
   <link href="http://www.seanguo.cn/atom.xml" rel="self"/>
   <link href="http://www.seanguo.cn/"/>
-  <updated>2013-11-29T14:56:00+08:00</updated>
+  <updated>2013-11-29T15:07:15+08:00</updated>
   <id>http://www.seanguo.cn/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -21,11 +21,7 @@
     <content type="html"><![CDATA[<ul>
 <li><p><strong>Windows 7</strong>的在 C:/Users/[用户名]/AppData/Roaming/Apple Computer/MobileSync/Backup/</p></li>
 <li><p><strong>Windows XP</strong>: C:/Documents and Settings(用户名)/Application Data/Apple Computer/MobileSync/Backup</p></li>
-<li><p><strong>Mac</strong> 中：~/Library/Application Support/MobileSync/Backup<p class='post-footer'>
-          Oringial Link:
-          <a href='http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location/'><a href="http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location/">http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location/</a></a>
-          &nbsp;written by <a href='http://www.seanguo.cn'>Sean Guo</a>
-          </p></p></li>
+<li><p><strong>Mac</strong> 中：~/Library/Application Support/MobileSync/Backup</p></li>
 </ul>
 
 ]]></content>
@@ -1130,13 +1126,6 @@ First, start the MongoDB server in one terminal:</p>
 
 
 
-
-<p class='post-footer'>
-            Oringial Link:
-            <a href='http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare/'>http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare/</a>
-            &nbsp;written by <a href='http://www.seanguo.cn'>Sean Guo</a>
-            </p>
-
 ]]></content>
   </entry>
   
@@ -1151,13 +1140,6 @@ First, start the MongoDB server in one terminal:</p>
 <div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="s2">&quot;/Users/sean/Desktop/test.rb&quot;</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
-
-
-<p class='post-footer'>
-            Oringial Link:
-            <a href='http://www.seanguo.cn/blog/2013/11/27/my-ruby-learning/'>http://www.seanguo.cn/blog/2013/11/27/my-ruby-learning/</a>
-            &nbsp;written by <a href='http://www.seanguo.cn'>Sean Guo</a>
-            </p>
 
 ]]></content>
   </entry>
@@ -1222,11 +1204,7 @@ First, start the MongoDB server in one terminal:</p>
 <ul>
 <li><a href="http://ruby-doc.com/docs/ProgrammingRuby/">http://ruby-doc.com/docs/ProgrammingRuby/</a></li>
 <li><a href="http://www.ruby-doc.org/">http://www.ruby-doc.org/</a></li>
-<li><a href="http://rubydoc.info/gems/chef/11.6.0/frames">http://rubydoc.info/gems/chef/11.6.0/frames</a><p class='post-footer'>
-          Oringial Link:
-          <a href='http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef/'><a href="http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef/">http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef/</a></a>
-          &nbsp;written by <a href='http://www.seanguo.cn'>Sean Guo</a>
-          </p></li>
+<li><a href="http://rubydoc.info/gems/chef/11.6.0/frames">http://rubydoc.info/gems/chef/11.6.0/frames</a></li>
 </ul>
 
 ]]></content>
@@ -1237,13 +1215,7 @@ First, start the MongoDB server in one terminal:</p>
     <link href="http://www.seanguo.cn/blog/2013/11/26/hello-world/"/>
     <updated>2013-11-26T15:42:16+08:00</updated>
     <id>http://www.seanguo.cn/blog/2013/11/26/hello-world</id>
-    <content type="html"><![CDATA[<p>Thanks <a href="http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/">http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/</a> I got this blog system working.<p class='post-footer'></p>
-
-<pre><code>        Oringial Link:
-        &lt;a href='http://www.seanguo.cn/blog/2013/11/26/hello-world/'&gt;http://www.seanguo.cn/blog/2013/11/26/hello-world/&lt;/a&gt;
-        &amp;nbsp;written by &lt;a href='http://www.seanguo.cn'&gt;Sean Guo&lt;/a&gt;
-        &lt;/p&gt;
-</code></pre>
+    <content type="html"><![CDATA[<p>Thanks <a href="http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/">http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/</a> I got this blog system working.</p>
 ]]></content>
   </entry>
   
