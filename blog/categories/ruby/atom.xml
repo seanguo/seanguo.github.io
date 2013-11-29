@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: ruby | Sean's Blog]]></title>
+  <link href="http://www.seanguo.cn/blog/categories/ruby/atom.xml" rel="self"/>
+  <link href="http://www.seanguo.cn/"/>
+  <updated>2013-11-29T14:56:00+08:00</updated>
+  <id>http://www.seanguo.cn/</id>
+  <author>
+    <name><![CDATA[Sean Guo]]></name>
+    <email><![CDATA[seanguo85@qq.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[My Ruby learning]]></title>
+    <link href="http://www.seanguo.cn/blog/2013/11/27/my-ruby-learning/"/>
+    <updated>2013-11-27T09:39:36+08:00</updated>
+    <id>http://www.seanguo.cn/blog/2013/11/27/my-ruby-learning</id>
+    <content type="html"><![CDATA[<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Output something</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="no">Users</span><span class="o">/</span><span class="n">sean</span><span class="o">/</span><span class="no">Desktop</span><span class="o">/</span><span class="nb">test</span><span class="o">.</span><span class="n">rb</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
+  
+</feed>

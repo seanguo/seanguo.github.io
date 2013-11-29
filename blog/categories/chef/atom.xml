@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: chef | Sean's Blog]]></title>
-  <link href="http://seanguo.github.io/blog/categories/chef/atom.xml" rel="self"/>
-  <link href="http://seanguo.github.io/"/>
-  <updated>2013-11-28T13:21:07+08:00</updated>
-  <id>http://seanguo.github.io/</id>
+  <link href="http://www.seanguo.cn/blog/categories/chef/atom.xml" rel="self"/>
+  <link href="http://www.seanguo.cn/"/>
+  <updated>2013-11-29T14:56:00+08:00</updated>
+  <id>http://www.seanguo.cn/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Materials to learn Chef]]></title>
-    <link href="http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef/"/>
+    <link href="http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef/"/>
     <updated>2013-11-26T20:57:31+08:00</updated>
-    <id>http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef</id>
+    <id>http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef</id>
     <content type="html"><![CDATA[<h2>Setup:</h2>
 
 <h3>Develop tool:</h3>
@@ -37,6 +37,9 @@
 <li><a href="https://wiki.opscode.com/display/chef/Breaking+Changes+in+Chef+11">https://wiki.opscode.com/display/chef/Breaking+Changes+in+Chef+11</a></li>
 <li><a href="http://docs.opscode.com/release_notes.html">http://docs.opscode.com/release_notes.html</a></li>
 </ul>
+
+
+<!-- more -->
 
 
 <h2>Advanced:</h2>

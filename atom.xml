@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Sean's Blog]]></title>
-  <link href="http://seanguo.github.io/atom.xml" rel="self"/>
-  <link href="http://seanguo.github.io/"/>
-  <updated>2013-11-28T13:21:07+08:00</updated>
-  <id>http://seanguo.github.io/</id>
+  <link href="http://www.seanguo.cn/atom.xml" rel="self"/>
+  <link href="http://www.seanguo.cn/"/>
+  <updated>2013-11-29T14:56:00+08:00</updated>
+  <id>http://www.seanguo.cn/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,13 +15,17 @@
   
   <entry>
     <title type="html"><![CDATA[itunes的备份之后的文件在哪儿]]></title>
-    <link href="http://seanguo.github.io/blog/2013/11/27/itunes-backup-location/"/>
+    <link href="http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location/"/>
     <updated>2013-11-27T19:46:51+08:00</updated>
-    <id>http://seanguo.github.io/blog/2013/11/27/itunes-backup-location</id>
+    <id>http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location</id>
     <content type="html"><![CDATA[<ul>
 <li><p><strong>Windows 7</strong>的在 C:/Users/[用户名]/AppData/Roaming/Apple Computer/MobileSync/Backup/</p></li>
 <li><p><strong>Windows XP</strong>: C:/Documents and Settings(用户名)/Application Data/Apple Computer/MobileSync/Backup</p></li>
-<li><p><strong>Mac</strong> 中：~/Library/Application Support/MobileSync/Backup</p></li>
+<li><p><strong>Mac</strong> 中：~/Library/Application Support/MobileSync/Backup<p class='post-footer'>
+          Oringial Link:
+          <a href='http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location/'><a href="http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location/">http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location/</a></a>
+          &nbsp;written by <a href='http://www.seanguo.cn'>Sean Guo</a>
+          </p></p></li>
 </ul>
 
 ]]></content>
@@ -29,14 +33,17 @@
   
   <entry>
     <title type="html"><![CDATA[NoSql database compare]]></title>
-    <link href="http://seanguo.github.io/blog/2013/11/27/nosql-database-compare/"/>
+    <link href="http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare/"/>
     <updated>2013-11-27T16:47:57+08:00</updated>
-    <id>http://seanguo.github.io/blog/2013/11/27/nosql-database-compare</id>
+    <id>http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare</id>
     <content type="html"><![CDATA[<h2>Introduction</h2>
 
 <p>The goal of this article is trying compare the popular NoSql databases and choose one for one of our company&rsquo;s product. It was based on SQL database but suffering from low scalibility and performance. So we want to migrate to NoSQL based product. Since Most of the NoSQL database are of high scalibility and performance under some condition.</p>
 
 <p>Before that we need to know some of the backgournd knowlege. Currently there are two kind of data store model:</br></p>
+
+<!-- more -->
+
 
 <h3>RDBMS:</h3>
 
@@ -1123,14 +1130,21 @@ First, start the MongoDB server in one terminal:</p>
 
 
 
+
+<p class='post-footer'>
+            Oringial Link:
+            <a href='http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare/'>http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare/</a>
+            &nbsp;written by <a href='http://www.seanguo.cn'>Sean Guo</a>
+            </p>
+
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[My Ruby learning]]></title>
-    <link href="http://seanguo.github.io/blog/2013/11/27/my-ruby-learning/"/>
+    <link href="http://www.seanguo.cn/blog/2013/11/27/my-ruby-learning/"/>
     <updated>2013-11-27T09:39:36+08:00</updated>
-    <id>http://seanguo.github.io/blog/2013/11/27/my-ruby-learning</id>
+    <id>http://www.seanguo.cn/blog/2013/11/27/my-ruby-learning</id>
     <content type="html"><![CDATA[
 
 <figure class='code'><figcaption><span>Output something</span></figcaption>
@@ -1138,14 +1152,21 @@ First, start the MongoDB server in one terminal:</p>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="s2">&quot;/Users/sean/Desktop/test.rb&quot;</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<p class='post-footer'>
+            Oringial Link:
+            <a href='http://www.seanguo.cn/blog/2013/11/27/my-ruby-learning/'>http://www.seanguo.cn/blog/2013/11/27/my-ruby-learning/</a>
+            &nbsp;written by <a href='http://www.seanguo.cn'>Sean Guo</a>
+            </p>
+
 ]]></content>
   </entry>
   
   <entry>
     <title type="html"><![CDATA[Materials to learn Chef]]></title>
-    <link href="http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef/"/>
+    <link href="http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef/"/>
     <updated>2013-11-26T20:57:31+08:00</updated>
-    <id>http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef</id>
+    <id>http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef</id>
     <content type="html"><![CDATA[<h2>Setup:</h2>
 
 <h3>Develop tool:</h3>
@@ -1165,6 +1186,9 @@ First, start the MongoDB server in one terminal:</p>
 <li><a href="https://wiki.opscode.com/display/chef/Breaking+Changes+in+Chef+11">https://wiki.opscode.com/display/chef/Breaking+Changes+in+Chef+11</a></li>
 <li><a href="http://docs.opscode.com/release_notes.html">http://docs.opscode.com/release_notes.html</a></li>
 </ul>
+
+
+<!-- more -->
 
 
 <h2>Advanced:</h2>
@@ -1198,7 +1222,11 @@ First, start the MongoDB server in one terminal:</p>
 <ul>
 <li><a href="http://ruby-doc.com/docs/ProgrammingRuby/">http://ruby-doc.com/docs/ProgrammingRuby/</a></li>
 <li><a href="http://www.ruby-doc.org/">http://www.ruby-doc.org/</a></li>
-<li><a href="http://rubydoc.info/gems/chef/11.6.0/frames">http://rubydoc.info/gems/chef/11.6.0/frames</a></li>
+<li><a href="http://rubydoc.info/gems/chef/11.6.0/frames">http://rubydoc.info/gems/chef/11.6.0/frames</a><p class='post-footer'>
+          Oringial Link:
+          <a href='http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef/'><a href="http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef/">http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef/</a></a>
+          &nbsp;written by <a href='http://www.seanguo.cn'>Sean Guo</a>
+          </p></li>
 </ul>
 
 ]]></content>
@@ -1206,10 +1234,16 @@ First, start the MongoDB server in one terminal:</p>
   
   <entry>
     <title type="html"><![CDATA[Hello World]]></title>
-    <link href="http://seanguo.github.io/blog/2013/11/26/hello-world/"/>
+    <link href="http://www.seanguo.cn/blog/2013/11/26/hello-world/"/>
     <updated>2013-11-26T15:42:16+08:00</updated>
-    <id>http://seanguo.github.io/blog/2013/11/26/hello-world</id>
-    <content type="html"><![CDATA[<p>Thanks <a href="http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/">http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/</a> I got this blog system working.</p>
+    <id>http://www.seanguo.cn/blog/2013/11/26/hello-world</id>
+    <content type="html"><![CDATA[<p>Thanks <a href="http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/">http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/</a> I got this blog system working.<p class='post-footer'></p>
+
+<pre><code>        Oringial Link:
+        &lt;a href='http://www.seanguo.cn/blog/2013/11/26/hello-world/'&gt;http://www.seanguo.cn/blog/2013/11/26/hello-world/&lt;/a&gt;
+        &amp;nbsp;written by &lt;a href='http://www.seanguo.cn'&gt;Sean Guo&lt;/a&gt;
+        &lt;/p&gt;
+</code></pre>
 ]]></content>
   </entry>
   

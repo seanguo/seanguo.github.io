@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: nosql | Sean's Blog]]></title>
-  <link href="http://seanguo.github.io/blog/categories/nosql/atom.xml" rel="self"/>
-  <link href="http://seanguo.github.io/"/>
-  <updated>2013-11-28T13:21:07+08:00</updated>
-  <id>http://seanguo.github.io/</id>
+  <link href="http://www.seanguo.cn/blog/categories/nosql/atom.xml" rel="self"/>
+  <link href="http://www.seanguo.cn/"/>
+  <updated>2013-11-29T14:56:00+08:00</updated>
+  <id>http://www.seanguo.cn/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,14 +15,17 @@
   
   <entry>
     <title type="html"><![CDATA[NoSql database compare]]></title>
-    <link href="http://seanguo.github.io/blog/2013/11/27/nosql-database-compare/"/>
+    <link href="http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare/"/>
     <updated>2013-11-27T16:47:57+08:00</updated>
-    <id>http://seanguo.github.io/blog/2013/11/27/nosql-database-compare</id>
+    <id>http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare</id>
     <content type="html"><![CDATA[<h2>Introduction</h2>
 
 <p>The goal of this article is trying compare the popular NoSql databases and choose one for one of our company&rsquo;s product. It was based on SQL database but suffering from low scalibility and performance. So we want to migrate to NoSQL based product. Since Most of the NoSQL database are of high scalibility and performance under some condition.</p>
 
 <p>Before that we need to know some of the backgournd knowlege. Currently there are two kind of data store model:</br></p>
+
+<!-- more -->
+
 
 <h3>RDBMS:</h3>
 
