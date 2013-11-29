@@ -4,6 +4,8 @@ title: "Materials to learn Chef"
 date: 2013-11-26 20:57:31 +0800
 comments: true
 categories: chef
+description: "chef learning maerials"
+keywords: chef,ruby
 ---
 
 ##Setup:
@@ -19,7 +21,7 @@ categories: chef
 * http://docs.opscode.com/chef/lwrps_custom.html
 * https://wiki.opscode.com/display/chef/Breaking+Changes+in+Chef+11
 * http://docs.opscode.com/release_notes.html
-
+<!-- more -->
 ##Advanced:
 * http://www.prashantrajan.com/posts/2013/06/leveling-up-chef-best-practices/
 * http://erik.hollensbe.org/2013/03/16/the-chef-resource-run-queue/

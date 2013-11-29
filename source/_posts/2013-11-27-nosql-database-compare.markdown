@@ -4,6 +4,8 @@ title: "NoSql database compare"
 date: 2013-11-27 16:47:57 +0800
 comments: true
 categories: nosql
+description: "Nosql database compare"
+keywords: technique,nosql
 ---
 ##Introduction
 
@@ -11,6 +13,7 @@ The goal of this article is trying compare the popular NoSql databases and choos
 
 Before that we need to know some of the backgournd knowlege. Currently there are two kind of data store model:</br>
 
+<!-- more -->
 ###RDBMS:
 
 A short definition of an RDBMS is: a DBMS in which data is stored in tables and the relationships among the data are also stored in tables. The data can be accessed or reassembled in many different ways without having to change the table forms.</br>
