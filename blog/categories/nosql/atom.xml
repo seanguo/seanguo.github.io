@@ -1,0 +1,1073 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Nosql | Sean's Blog]]></title>
+  <link href="http://www.seanguo.cn/blog/categories/nosql/atom.xml" rel="self"/>
+  <link href="http://www.seanguo.cn/"/>
+  <updated>2016-11-16T11:05:47+08:00</updated>
+  <id>http://www.seanguo.cn/</id>
+  <author>
+    <name><![CDATA[Sean Guo]]></name>
+    <email><![CDATA[seanguo85@qq.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[NoSql Database Compare]]></title>
+    <link href="http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare/"/>
+    <updated>2013-11-27T16:47:57+08:00</updated>
+    <id>http://www.seanguo.cn/blog/2013/11/27/nosql-database-compare</id>
+    <content type="html"><![CDATA[<h2>Introduction</h2>
+
+<p>The goal of this article is trying compare the popular NoSql databases and choose one for one of our company&rsquo;s product. It was based on SQL database but suffering from low scalibility and performance. So we want to migrate to NoSQL based product. Since Most of the NoSQL database are of high scalibility and performance under some condition.</p>
+
+<p>Before that we need to know some of the backgournd knowlege. Currently there are two kind of data store model:</br></p>
+
+<!-- more -->
+
+
+<h3>RDBMS:</h3>
+
+<p>A short definition of an RDBMS is: a DBMS in which data is stored in tables and the relationships among the data are also stored in tables. The data can be accessed or reassembled in many different ways without having to change the table forms.</br></p>
+
+<p>This one is the data store model currently used in the SIPoint product that is facilitated by the using of the Hibernate framework to get a uniform interface to manipulate all kinds of database. The Hibernate framework is doing the Object Relation Mapping to keep programmer from complex SQL language. </br></p>
+
+<p>But the disadvantage of the RDBMS is the low efficiency when get lots of concurrent write operation to the database and it is hard to scale the database to multiple servers.  And in the contrast here comes:</p>
+
+<h3>NoSql:</h3>
+
+<p>In computing, NoSQL is a broad class of database management systems that differ from classic relational database management systems (RDBMSes) in some significant ways. These data stores may not require fixed table schemas, usually avoid join operations, and typically scale horizontally. Academia typically refers to these databases as structured storage, a term that would include classic relational databases as a subset.
+NoSql sacrifices some not necessary consistence in some circumstances to get high performance and easy to scale up.</br></p>
+
+<h2>NoSQL vs. SQL databases</h2>
+
+<p>There are some concepts must be given a short introduction before we can do the compare.</br></p>
+
+<ul>
+<li><strong>Relation Model</strong>: The relational model&rsquo;s central idea is to describe a database as a collection of predicates over a finite set of predicate variables, describing constraints on the possible values and combinations of values. The content of the database at any given time is a finite (logical) model of the database, i.e. a set of relations, one per predicate variable, such that all predicates are satisfied. A request for information from the database (a database query) is also a predicate.</li>
+<li><strong>ACID</strong>: ACID (atomicity, consistency, isolation, durability) is a set of properties that guarantee database transactions are processed reliably.</li>
+<li><strong>Atomicity</strong> requires that database modifications must follow an &ldquo;all or nothing&rdquo; rule. Each transaction is said to be atomic. If one part of the transaction fails, the entire transaction fails and the database state is left unchanged.</li>
+<li><strong>Isolation</strong> refers to the requirement that other operations cannot access data that has been modified during a transaction that has not yet completed.</li>
+<li><strong>Durability</strong> is the ability of the DBMS to recover the committed transaction updates against any kind of system failure (hardware or software).</li>
+<li><strong>CAP</strong>: The CAP theorem, also known as Brewer&rsquo;s theorem, states that there are three primary concerns you must balance when choosing a data management system: consistency, availability, and partition tolerance.</br></li>
+<li><strong>Consistency</strong> means that each client always has the same view of the data. </br></li>
+<li><strong>Availability</strong> means that all clients can always read and write.</br></li>
+<li><p><strong>Partition</strong> tolerance means that the system works well across physical network partitions.</br>
+According to the theorem, a distributed system can satisfy any two of these guarantees at the same time, but not all three.</br></p></li>
+<li><p><strong>Data Model</strong>:</p></li>
+<li>Relational systems are the databases we&rsquo;ve been using for a while now. RDBMSs and systems that support ACIDity and joins are considered relational.</br></li>
+<li>Key-value systems basically support get, put, and delete operations based on a primary key.</br></li>
+<li>Column-oriented systems still use tables but have no joins (joins must be handled within your
+application). Obviously, they store data by column as opposed to traditional row-oriented databases. This makes aggregations much easier.</br></li>
+<li><p>Document-oriented systems store structured &ldquo;documents&rdquo; such as JSON or XML but have no joins (joins must be handled within your application). It&rsquo;s very easy to map data from object-oriented software to these systems.</br></p></li>
+<li><p><strong>MapReduce</strong>: MapReduce is a framework for processing huge datasets on certain kinds of distributable problems using a large number of computers (nodes), collectively referred to as a cluster (if all nodes use the same hardware) or as a grid (if the nodes use different hardware). Computational processing can occur on data stored either in a filesystem (unstructured) or within a database (structured).</p></li>
+<li>&ldquo;<strong>Map</strong>&rdquo; step: The master node takes the input, partitions it up into smaller sub-problems, and distributes those to worker nodes. A worker node may do this again in turn, leading to a multi-level tree structure. The worker node processes that smaller problem, and passes the answer back to its master node.</li>
+<li><p>&ldquo;<strong>Reduce</strong>&rdquo; step: The master node then takes the answers to all the sub-problems and combines them in some way to get the output – the answer to the problem it was originally trying to solve.</br>
+The advantage of MapReduce is that it allows for distributed processing of the map and reduction operations. Provided each mapping operation is independent of the others, all maps can be performed in parallel. This framework is often applied by the distributed NoSQL databases.</br></p></li>
+<li><p><strong>Eventual consistency</strong>: This is a specific form of weak consistency; the storage system guarantees that if no new updates are made to the object, eventually all accesses will return the last updated value. If no failures occur, the maximum size of the inconsistency window can be determined based on factors such as communication delays, the load on the system, and the number of replicas involved in the replication scheme. The most popular system that implements eventual consistency is DNS (Domain Name System). Updates to a name are distributed according to a configured pattern and in combination with time-controlled caches; eventually, all clients will see the update.</br></p></li>
+<li><strong>Multiversion concurrency control</strong> (abbreviated MCC or MVCC), in the database field of computer science, is a concurrency control method commonly used by database management systems to provide concurrent access to the database and in programming languages to implement transactional memory.</br></li>
+</ul>
+
+
+<p>For instance, a database will implement updates not by deleting an old piece of data and overwriting it with a new one, but instead by marking the old data as obsolete and adding the newer &ldquo;version.&rdquo; Thus there are multiple versions stored, but only one is the latest. This allows the database to avoid overhead of filling in holes in memory or disk structures but requires (generally) the system to periodically sweep through and delete the old, obsolete data objects.</br></p>
+
+<p>Below are the general compare between the two data store models:</br></p>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th> Name  </th>
+<th> Schema </th>
+<th> ACID </th>
+<th> CAP </th>
+<th> Efficiency </th>
+<th> Scalability </th>
+<th> Programming </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td> RDBMS </td>
+<td> Fixed  </td>
+<td> All </td>
+<td> Hardly no P </td>
+<td> Hard to scale </td>
+<td> Hibernate to unify all DB </td>
+<td></td>
+</tr>
+<tr>
+<td></td>
+<td> NoSQL </td>
+<td> Not require fixed schema </td>
+<td> Not All </td>
+<td> CA or AP </td>
+<td> High performance on IO, and can use MapReduce to distribute work to multiple machines </td>
+<td> High scalability on design </td>
+<td> Each database has its own API, but it’s simple |</td>
+</tr>
+</tbody>
+</table>
+
+
+<p></br></p>
+
+<h3>NoSql databases compare</h3>
+
+<p>Below we choose some popular NoSQL databases to do a comprehensive compare:</p>
+
+<h3>Basic compare</h3>
+
+<table>
+<thead>
+<tr>
+<th></th>
+<th align="left"> Name </th>
+<th> Type </th>
+<th> Open Source  </th>
+<th> Source Language </th>
+<th> CAP </th>
+<th> Managing shell </th>
+<th> Query Method </th>
+<th> API </th>
+<th> Concurrency </th>
+<th> Successful usecases   </th>
+<th> Scalability </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td align="left"> Cassadra </td>
+<td> Wide column </td>
+<td> Y </td>
+<td> JAVA </td>
+<td> AP, Configurable C </td>
+<td> No shell  </td>
+<td> MapReduce </td>
+<td> Many Thrift client </td>
+<td> Eventually consistence </td>
+<td> Digg, Facebook, Twitter etc. </td>
+<td> P2P, no single points of failure</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Voldemort </td>
+<td> Key-value </td>
+<td> Y </td>
+<td> C++ </td>
+<td> AP </td>
+<td> Built-in </td>
+<td>   </td>
+<td> Java </td>
+<td> Eventually Consistent </td>
+<td> Linkedin </td>
+<td> Dynamo</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Kyoto Cabinet &amp; Kyoto Tycoon </td>
+<td> Key-value </td>
+<td> Y </td>
+<td> C++ </td>
+<td> AP </td>
+<td> Command Line Utility `kchashmgr' </td>
+<td> MapReduce </td>
+<td> Many langs </td>
+<td> Eventually consistency </td>
+<td> mixi.jp </td>
+<td> Asynchronous Master-slave or dual-master replication</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> MongoDB </td>
+<td> Document oriented </td>
+<td> Y </td>
+<td> C++ </td>
+<td> CP </td>
+<td> Built-in </td>
+<td> Dynamic object-based language &amp; MapReduce </td>
+<td> BSON </td>
+<td> Update in Place.  </td>
+<td> The New York Times,SourceForge </td>
+<td> Master-Slave Replication |</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> HBase </td>
+<td> Wide column </td>
+<td> Y </td>
+<td> JAVA </td>
+<td> CP </td>
+<td> Jruby </td>
+<td> MapReduce Java / any exec </td>
+<td> Java / any writer  </td>
+<td>   </td>
+<td>   </td>
+<td> Hadoop</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> Redis </td>
+<td> Key-value </td>
+<td> Y </td>
+<td> C </td>
+<td> CP </td>
+<td> Built-in </td>
+<td>  </td>
+<td> Tons of languages </td>
+<td> In memory and saves asynchronous disk after a defined time. Append only mode available. Different kinds of fsync policies. </td>
+<td> github，Engine Yard </td>
+<td> Master-slave replication</td>
+</tr>
+<tr>
+<td></td>
+<td align="left"> CouchDB </td>
+<td> Document oriented </td>
+<td> Y </td>
+<td> Erlang </td>
+<td> AP </td>
+<td> None </td>
+<td> MapReduceR of JavaScript </td>
+<td> Funcs REST/JSON </td>
+<td> MVCC </td>
+<td>  </td>
+<td>  peer-based distributed</td>
+</tr>
+</tbody>
+</table>
+
+
+<p></br></p>
+
+<h3>Farther compare:</h3>
+
+<p>For those databases mentioned in the above, first we dropped CouchDB since it only has REST API. KC and Redis are the lightweight Key-value implementation and can scale up in a small cluster. And Cassandra, Voldemort and HBase are good solutions for large-scale clusters. And for MongoDB the only document oriented database we will describe it later. And we will regroup these databases and do a farther compare.</p>
+
+<h4>Cassandra:</h4>
+
+<p>The Apache Cassandra Project develops a highly scalable second-generation distributed database, bringing together Dynamo&rsquo;s fully distributed design and Bigtable&rsquo;s ColumnFamily-based data model.
+Cassandra was open sourced by Facebook in 2008, and is now developed by Apache committers and contributors from many companies.</p>
+
+<h5>Feature:</h5>
+
+<ul>
+<li>Fault Tolerant
+Data is automatically replicated to multiple nodes for fault-tolerance. Replication across multiple data centers is supported. Failed nodes can be replaced with no downtime.</li>
+<li>Decentralized
+Every node in the cluster is identical. There are no network bottlenecks. There are no single points of failure.</li>
+<li>You&rsquo;re in Control
+Choose between synchronous or asynchronous replication for each update. Highly available asynchronous operations are optimized with features like Hinted Handoff and Read Repair.</li>
+<li>Rich Data Model
+Allows efficient use for many applications beyond simple key/value.</li>
+<li>Elastic
+Read and write throughput both increase linearly as new machines are added, with no downtime or interruption to applications.</li>
+<li>Durable
+Cassandra is suitable for applications that can&rsquo;t afford to lose data, even when an entire data center goes down.</li>
+</ul>
+
+
+<h5>Data Model:</h5>
+
+<p>Cassandra provides a structured key-value store with tunable consistency. Keys map to multiple values, which are grouped into column families. The column families are fixed when a Cassandra database is created, but columns can be added to a family at any time. Furthermore, columns are added only to specified keys, so different keys can have different numbers of columns in any given family.</p>
+
+<p>The values from a column family for each key are stored together. This makes Cassandra a hybrid data management system between a column-oriented DBMS and a row-oriented store. Also, besides using the way of modeling of BigTable, it has properties like eventual consistency, the Gossip protocol, a master-master way of serving the read and write requests that are inspired by Amazon&rsquo;s Dynamo.
+The basic concepts are:</p>
+
+<ul>
+<li>Cluster: the machines (nodes) in a logical Cassandra instance. Clusters can contain multiple keyspaces.</li>
+<li>Keyspace: a namespace for ColumnFamilies, typically one per application.</li>
+<li>ColumnFamilies contain multiple columns, each of which has a name, value, and a timestamp, and which are referenced by row keys.</li>
+<li>SuperColumns can be thought of as columns that themselves have subcolumns.</li>
+</ul>
+
+
+<p><strong>Limitations</strong>:</p>
+
+<ul>
+<li>All data for a single row must fit (on disk) on a single machine in the cluster. Because row keys alone are used to determine the nodes responsible for replicating their data, the amount of data associated with a single key has this upper bound.</li>
+<li>A single column value may not be larger than 2GB.</li>
+<li>The maximum of column per row is 2 billion.</li>
+<li>The key (and column names) must be under 64K bytes.</li>
+</ul>
+
+
+<h4>HBase</h4>
+
+<p>HBase is the Hadoop database. Use it when you need random, realtime read/write access to your Big Data. This project&rsquo;s goal is the hosting of very large tables &mdash; billions of rows X millions of columns &mdash; atop clusters of commodity hardware.
+HBase is an open-source, distributed, versioned, column-oriented store modeled after Google' Bigtable: A Distributed Storage System for Structured by Chang et al. Just as Bigtable leverages the distributed data storage provided by the Google File System, HBase provides Bigtable-like capabilities on top of Hadoop.</p>
+
+<h5>Feature:</h5>
+
+<ul>
+<li>Convenient base classes for backing Hadoop MapReduce jobs with HBase tables including cascading, hive and pig source and sink modules</li>
+<li>Query predicate push down via server side scan and get filters</li>
+<li>Optimizations for real time queries</li>
+<li>A Thrift gateway and a REST-ful Web service that supports XML, Protobuf, and binary data encoding options</li>
+<li>Extensible jruby-based (JIRB) shell</li>
+<li>Support for exporting metrics via the Hadoop metrics subsystem to files or Ganglia; or via JMX</li>
+</ul>
+
+
+<h5>Data Model:</h5>
+
+<p>In short, applications store data into an HBase table. Tables are made of rows and columns. All columns in HBase belong to a particular column family. Table cells &mdash; the intersection of row and column coordinates &mdash; are versioned. A cell’s content is an uninterpreted array of bytes.</p>
+
+<p>Table row keys are also byte arrays so almost anything can serve as a row key from strings to binary representations of longs or even serialized data structures. Rows in HBase tables are sorted by row key. The sort is byte-ordered. All table accesses are via the table row key &mdash; its primary key.
+Cassandra and HBase are both highly scalable column-oriented database. Cassandra wins for its simple configuration and flexibility to switch between CAP attributes, no single point of failure is also more scalable.</p>
+
+<h4>Voldemort:</h4>
+
+<p>Voldemort is a distributed key-value storage system</p>
+
+<h5>Feature:</h5>
+
+<ul>
+<li>Voldemort combines in memory caching with the storage system so that a separate caching tier is not required (instead the storage system itself is just fast)</li>
+<li>Unlike MySQL replication, both reads and writes scale horizontally</li>
+<li>Data portioning is transparent, and allows for cluster expansion without rebalancing all data</li>
+<li>Data replication and placement is decided by a simple API to be able to accommodate a wide range of application specific strategies</li>
+<li>The storage layer is completely mockable so development and unit testing can be done against a throw-away in-memory storage system without needing a real cluster (or even a real storage system) for simple testing</li>
+</ul>
+
+
+<h5>Data Model:</h5>
+
+<p>The equivalent here is a &ldquo;store&rdquo;, we don&rsquo;t use the word table since the data is not necessarily tabular (a value can contain lists and mappings which are not considered in a strict relational mapping). Each key is unique to a store, and each key can have at most one value.</p>
+
+<p>Note that although we don&rsquo;t support one-many relations, we do support lists as values that accomplishes the same thing&mdash;so it is possible to store a reasonable number of values associated with a single key. This corresponds to a java.util.Map where the value is a java.util.List.</p>
+
+<p>Serialization in Voldemort is pluggable so you can use one of the baked in serializers or easily write your own. At the lowest level the data format for Voldemort is just arrays of bytes for both keys and values. Higher-level data formats are a configuration option that are set for each Store&mdash;any format can be supported by implementing a Serializer class that handles the translation between bytes and objects. Doing this ensures the client serializes the bytes correctly.</p>
+
+<p><strong>Operations</strong>:</p>
+
+<p>To enable high performance and availability we allow only very simple key-value data access. Both keys and values can be complex compound objects including lists or maps, but none-the-less the only supported queries are effectively the following:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>value = store.get(key)
+</span><span class='line'>store.put(key, value)
+</span><span class='line'>store.delete(key)</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Voldemort supports hashtable semantics, so a single value can be modified at a time and retrieval is by primary key. This makes distribution across machines particularly easy since everything can be split by the primary key.</p>
+
+<h4>Kyoto Cabinet:</h4>
+
+<p>Kyoto Cabinet is a library of routines for managing a database. The database is a simple data file containing records, each is a pair of a key and a value. Every key and value is serial bytes with variable length. Both binary data and character string can be used as a key and a value. Each key must be unique within a database. There is neither concept of data tables nor data types. Records are organized in hash table or B+ tree.</p>
+
+<h5>Feature</h5>
+
+<p>The database is a simple data file containing records, each is a pair of a key and a value. Every key and value is serial bytes with variable length. Both binary data and character string can be used as a key and a value. Each key must be unique within a database. There is neither concept of data tables nor data types. Records are organized in hash table or B+ tree.</p>
+
+<h5>Operations:</h5>
+
+<p>The following access methods are provided to the database: storing a record with a key and a value, deleting a record by a key, retrieving a record by a key. Moreover, traversal access to every key are provided.</p>
+
+<h4>Redis</h4>
+
+<p>Redis is an open source, advanced key-value store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets and sorted sets.
+You can run atomic operations on these types, like appending to a string; incrementing the value in a hash; pushing to a list; computing set intersection, union and difference; or getting the member with highest ranking in a sorted set.</p>
+
+<h5>Feature</h5>
+
+<p>Redis is an open source, advanced key-value store. It is often referred to as a data structure server since keys can contain strings, hashes, lists, sets and sorted sets.
+You can run atomic operations on these types, like appending to a string; incrementing the value in a hash; pushing to a list; computing set intersection, union and difference; or getting the member with highest ranking in a sorted set.</p>
+
+<h5>Data Model:</h5>
+
+<p>As you already probably know Redis is not a plain key-value store, actually it is a data structures server, supporting different kind of values. That is, you can&rsquo;t just set strings as values of keys. All the following data types are supported as values:</p>
+
+<ul>
+<li>Binary-safe strings.</li>
+<li>Lists of binary-safe strings.</li>
+<li>Sets of binary-safe strings, that are collection of unique unsorted elements. You can think at this as a Ruby hash where all the keys are set to the &lsquo;true&rsquo; value.</li>
+<li>Sorted sets, similar to Sets but where every element is associated to a floating number score. The elements are taken sorted by score. You can think of this as Ruby hashes where the key is the element and the value is the score, but where elements are always taken in order without requiring a sorting operation.</li>
+</ul>
+
+
+<h4>Limitations:</h4>
+
+<p>Redis meets the needs for Registrar very well since its support on list of value and its high performance on IO operation. But it’s written in C, it will require some work to make it start when delivering to users in the MOHO framework.</br></p>
+
+<p>  In the three Key-value type databases, Voldemort is a more distributed Key-value NoSQL database implementation than the other two, and it has a very simple API to manipulate the database.</p>
+
+<h2>Conclusion:</h2>
+
+<p>MongoDB is document oriented and very good at large amount of data searching. It is a good option for document store.</br>
+Redis will be good choice for K-V mapping don’t scale too large since it has very good performance on concurrent IO and support list type value. Voldemort will be good choice in a large-scale deployment for its high available design and simple API.</br>
+But Redis and Voldemort are Key-value databases that do not have enough function for the future complicated data migrated from RDBMS requirement.</br>
+So finally we choose Cassadra. It is a mixed type database, which has Dynamo’s distributed Key-value feature, and also have the rich function from the column feature like Google’s Bigtable. It is suitable for the situation both usecases in the our product. And it’s very mature on production, a open-source Java project and for its HA and HS in large scale.</p>
+
+<h2>Reference</h2>
+
+<ol>
+<li>SQL vs. NoSQL <a href="http://www.linuxjournal.com/article/10770?page=0,0">http://www.linuxjournal.com/article/10770?page=0,0</a></br></li>
+<li>NoSQL数据库探讨之一 － 为什么要用非关系数据库？ <a href="http://robbin.iteye.com/blog/524977">http://robbin.iteye.com/blog/524977</a></br></li>
+<li>NoSQL databases <a href="http://nosql-database.org/">http://nosql-database.org/</a></br></li>
+<li>Visual Guide to NoSQL Systems <a href="http://blog.nahurst.com/visual-guide-to-nosql-systems">http://blog.nahurst.com/visual-guide-to-nosql-systems</a></br></li>
+<li>Eventually consistence <a href="http://www.allthingsdistributed.com/2008/12/eventually_consistent.html">http://www.allthingsdistributed.com/2008/12/eventually_consistent.html</a></br></li>
+<li>Brewer&rsquo;s CAP Theorem <a href="http://www.julianbrowne.com/article/viewer/brewers-cap-theorem">http://www.julianbrowne.com/article/viewer/brewers-cap-theorem</a></br></li>
+<li>Cassandra <a href="http://cassandra.apache.org/">http://cassandra.apache.org/</a></br></li>
+<li>Cassandra data model <a href="http://wiki.apache.org/cassandra/DataModel">http://wiki.apache.org/cassandra/DataModel</a></br></li>
+<li>Cassandra Architecture <a href="http://wiki.apache.org/cassandra/ArchitectureOverview">http://wiki.apache.org/cassandra/ArchitectureOverview</a></br></li>
+<li>Cassandra Embedding <a href="http://wiki.apache.org/cassandra/Embedding">http://wiki.apache.org/cassandra/Embedding</a></br></li>
+<li>Running Cassandra as an embedded service <a href="http://prettyprint.me/2010/02/14/running-cassandra-as-an-embedded-service/">http://prettyprint.me/2010/02/14/running-cassandra-as-an-embedded-service/</a></br></li>
+<li>HBase <a href="http://hbase.apache.org/">http://hbase.apache.org/</a></br></li>
+<li>HBase vs. Cassandra NoSQL battle <a href="http://www.roadtofailure.com/2009/10/29/hbase-vs-cassandra-nosql-battle/">http://www.roadtofailure.com/2009/10/29/hbase-vs-cassandra-nosql-battle/</a></br></li>
+<li>HBase vs. Cassandra : why we moved <a href="http://ria101.wordpress.com/2010/02/24/hbase-vs-cassandra-why-we-moved/">http://ria101.wordpress.com/2010/02/24/hbase-vs-cassandra-why-we-moved/</a></br></li>
+<li>Voldemort <a href="http://project-voldemort.com/">http://project-voldemort.com/</a></br></li>
+<li>Voldemort design <a href="http://project-voldemort.com/design.php">http://project-voldemort.com/design.php</a></br></li>
+<li>Dynamo: Amazon&rsquo;s Highly Available Key-Value Store <a href="http://s3.amazonaws.com/AllThingsDistributed/sosp/amazon-dynamo-sosp2007.pdf">http://s3.amazonaws.com/AllThingsDistributed/sosp/amazon-dynamo-sosp2007.pdf</a></br></li>
+<li>MongoDB <a href="http://www.mongodb.org/">http://www.mongodb.org/</a></br></li>
+<li>CouchDB <a href="http://couchdb.apache.org/">http://couchdb.apache.org/</a></br></li>
+<li>Redis <a href="http://redis.io/">http://redis.io/</a></br></li>
+<li>Tokyo Cabinet <a href="http://fallabs.com/tokyocabinet/">http://fallabs.com/tokyocabinet/</a></br></li>
+<li>Fundamental Specifications of Kyoto Cabinet <a href="http://fallabs.com/kyotocabinet/spex.html#features">http://fallabs.com/kyotocabinet/spex.html#features</a></br></li>
+<li>MemcacheDB <a href="http://memcachedb.org/">http://memcachedb.org/</a></br></li>
+<li>Database management system choices – beyond relational <a href="http://www.dbms2.com/2008/02/15/non-relational-database-management/">http://www.dbms2.com/2008/02/15/non-relational-database-management/</a></br></li>
+<li>NoSQL and RDBMS – choose your weapon <a href="http://www.servicestack.net/mythz_blog/?p=129">http://www.servicestack.net/mythz_blog/?p=129</a></br></li>
+<li>Streamy Development blog <a href="http://devblog.streamy.com/">http://devblog.streamy.com/</a></br></li>
+<li>Google Code University <a href="http://code.google.com/edu/parallel/mapreduce-tutorial.html">http://code.google.com/edu/parallel/mapreduce-tutorial.html</a></br></li>
+<li>Dynamo <a href="http://en.wikipedia.org/wiki/Dynamo_%28storage_system%29">http://en.wikipedia.org/wiki/Dynamo_%28storage_system%29</a></br></li>
+<li>BigTable <a href="http://en.wikipedia.org/wiki/Bigtable">http://en.wikipedia.org/wiki/Bigtable</a></br></li>
+<li>Hadoop <a href="http://en.wikipedia.org/wiki/Hadoop">http://en.wikipedia.org/wiki/Hadoop</a></br></li>
+<li>Thrift <a href="http://thrift.apache.org/">http://thrift.apache.org/</a></br></li>
+</ol>
+
+
+<h2>Appendix NoSQL Database setup and programming guide</h2>
+
+<h3>Cassadra:</h3>
+
+<h4>Setup</h4>
+
+<p>Cassandra is meant to run on a cluster of nodes, but will run equally well on a single machine. Download a binary distribution. The distribution&rsquo;s sample configuration conf/cassandra.yaml contains reasonable defaults for single node operation, but you will need to make sure that the paths exist for data_file_directories, commitlog_directory, and saved_caches_directory. Additionally, take a minute now to look over the logging configuration in conf/log4j.properties and make sure that directories exist for the configured log file(s) as well.</p>
+
+<p>Some people running OS X have trouble getting Java 6 to work. If you&rsquo;ve kept up with Apple&rsquo;s updates, Java 6 should already be installed (it comes in Mac OS X 10.5 Update 1). Unfortunately, Apple does not default to using it. What you have to do is change your JAVA_HOME environment setting to <em>/System/Library/Frameworks/JavaVM.framework/Versions/1.6/Home</em> and add <em>/System/Library/Frameworks/JavaVM.framework/Versions/1.6/Home/bin</em> to the beginning of your PATH.</p>
+
+<p>And now for the moment of truth, start up Cassandra by invoking bin/cassandra -f from the command line3. The service should start in the foreground and log gratuitously to standard-out.</p>
+
+<h4>Programming</h4>
+
+<p>The recommended way to communicate with Cassandra in your application is to use a higher-level client. These provide programming language specific APIs for talking to Cassandra in a variety of languages. The details will vary depending on programming language and client, but in general using a higher-level client will mean that you have to write less code and get several features for free that you would otherwise have to write yourself.  Using Hector for example:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">riptano</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">hector</span><span class="o">.</span><span class="na">example</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kn">import</span> <span class="nn">me.prettyprint.cassandra.serializers.StringSerializer</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.Cluster</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.Keyspace</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.beans.HColumn</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.exceptions.HectorException</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.factory.HFactory</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.mutation.Mutator</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.query.ColumnQuery</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.query.QueryResult</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;/&lt;</span><span class="n">em</span><span class="o">&gt;*</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">Inserts</span> <span class="n">the</span> <span class="n">value</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">John</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="n">under</span> <span class="n">the</span> <span class="n">Column</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">first</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="k">for</span> <span class="n">the</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">key</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">jsmith</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="n">in</span> <span class="n">the</span> <span class="n">Standard1</span> <span class="n">ColumnFamily</span>
+</span><span class='line'> <span class="o">*</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">To</span> <span class="n">run</span> <span class="k">this</span> <span class="n">example</span> <span class="n">from</span> <span class="nl">maven:</span>
+</span><span class='line'> <span class="o">*</span> <span class="n">mvn</span> <span class="o">-</span><span class="n">e</span> <span class="nl">exec:</span><span class="n">java</span> <span class="o">-</span><span class="n">Dexec</span><span class="o">.</span><span class="na">mainClass</span><span class="o">=&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">com</span><span class="o">.</span><span class="na">riptano</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">hector</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">InsertSingleColumn</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span>
+</span><span class='line'> <span class="o">*</span>
+</span><span class='line'> <span class="o">*</span> <span class="nd">@author</span> <span class="n">zznate</span>
+</span><span class='line'> <span class="o">*</span>
+</span><span class='line'> <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;/</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">InsertSingleColumn</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="kd">private</span> <span class="kd">static</span> <span class="n">StringSerializer</span> <span class="n">stringSerializer</span> <span class="o">=</span> <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
+</span><span class='line'>    <span class="n">Cluster</span> <span class="n">cluster</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">getOrCreateCluster</span><span class="o">(</span><span class="s">&quot;TestCluster&quot;</span><span class="o">,</span> <span class="s">&quot;localhost:9160&quot;</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">Keyspace</span> <span class="n">keyspaceOperator</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createKeyspace</span><span class="o">(</span><span class="s">&quot;Keyspace1&quot;</span><span class="o">,</span> <span class="n">cluster</span><span class="o">);</span>
+</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">Mutator</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">String</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">mutator</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createMutator</span><span class="o">(</span><span class="n">keyspaceOperator</span><span class="o">,</span> <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
+</span><span class='line'>        <span class="n">mutator</span><span class="o">.</span><span class="na">insert</span><span class="o">(</span><span class="s">&quot;jsmith&quot;</span><span class="o">,</span> <span class="s">&quot;Standard1&quot;</span><span class="o">,</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createStringColumn</span><span class="o">(</span><span class="s">&quot;first&quot;</span><span class="o">,</span> <span class="s">&quot;John&quot;</span><span class="o">));</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">ColumnQuery</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">columnQuery</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createStringColumnQuery</span><span class="o">(</span><span class="n">keyspaceOperator</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">columnQuery</span><span class="o">.</span><span class="na">setColumnFamily</span><span class="o">(</span><span class="s">&quot;Standard1&quot;</span><span class="o">).</span><span class="na">setKey</span><span class="o">(</span><span class="s">&quot;jsmith&quot;</span><span class="o">).</span><span class="na">setName</span><span class="o">(</span><span class="s">&quot;first&quot;</span><span class="o">);</span>
+</span><span class='line'>        <span class="n">QueryResult</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">HColumn</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">columnQuery</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Read HColumn from cassandra: &quot;</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
+</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Verify on CLI with:  get Keyspace1.Standard1[&#39;jsmith&#39;] &quot;</span><span class="o">);</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">HectorException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
+</span><span class='line'>    <span class="o">}</span>
+</span><span class='line'>    <span class="n">cluster</span><span class="o">.</span><span class="na">getConnectionManager</span><span class="o">().</span><span class="na">shutdown</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>HBase</h3>
+
+<h4>Setup:</h4>
+
+<p>Download and unpack the latest stable release. Click on the folder named stable and then download the file that ends in .tar.gz to your local filesystem; e.g. hbase-0.91.0-SNAPSHOT.tar.gz. Decompress and untar your download and then change into the unpacked directory.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> <span class="nv">$ </span>tar xfz hbase-0.91.0-SNAPSHOT.tar.gz
+</span><span class='line'> <span class="nv">$ </span><span class="nb">cd </span>hbase-0.91.0-SNAPSHOT
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+At this point, you are ready to start HBase. But before starting it, you might want to edit conf/hbase-site.xml and set the directory you want HBase to write to, hbase.rootdir.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='xml'><span class='line'> <span class="ni">&amp;lt;</span>?xml version=<span class="ni">&amp;ldquo;</span>1.0<span class="ni">&amp;rdquo;</span>?&gt;
+</span><span class='line'> <span class="ni">&amp;lt;</span>?xml-stylesheet type=<span class="ni">&amp;ldquo;</span>text/xsl<span class="ni">&amp;rdquo;</span> href=<span class="ni">&amp;ldquo;</span>configuration.xsl<span class="ni">&amp;rdquo;</span>?&gt;
+</span><span class='line'><span class="nt">&lt;configuration&gt;</span>
+</span><span class='line'>   <span class="nt">&lt;property&gt;&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;pre&gt;&lt;code&gt;</span> <span class="ni">&amp;lt;</span>name<span class="ni">&amp;gt;</span>hbase.rootdir<span class="ni">&amp;lt;</span>/name<span class="ni">&amp;gt;</span>
+</span><span class='line'> <span class="ni">&amp;lt;</span>value<span class="ni">&amp;gt;</span>file:///DIRECTORY/hbase<span class="ni">&amp;lt;</span>/value<span class="ni">&amp;gt;</span>
+</span><span class='line'><span class="nt">&lt;/code&gt;&lt;/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;p&gt;</span>   <span class="nt">&lt;/property&gt;</span>
+</span><span class='line'> <span class="nt">&lt;/configuration&gt;&lt;br/&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Replace DIRECTORY in the above with a path to a directory where you want HBase to store its data. By default, hbase.rootdir is set to /tmp/hbase-${user.name} which means you&rsquo;ll lose all your data whenever your server reboots (Most operating systems clear /tmp on restart).
+$ ./bin/start-hbase.sh starting Master, logging to logs/hbase-user-master-example.org.out</p>
+
+<p>You should now have a running standalone HBase instance. In standalone mode, HBase runs all daemons in the the one JVM; i.e. both the HBase and ZooKeeper daemons. HBase logs can be found in the logs subdirectory. Check them out especially if HBase had trouble starting.</p>
+
+<h4>Programming</h4>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.client.HTable</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.client.Scanner</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.io.BatchUpdate</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.io.Cell</span><span class="o">;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.io.RowResult</span><span class="o">;</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyClient</span> <span class="o">{</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span> <span class="n">args</span><span class="o">[])</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1">// You need a configuration object to tell the client where to connect.</span>
+</span><span class='line'><span class="c1">// But don&#39;t worry, the defaults are pulled from the local config file.</span>
+</span><span class='line'><span class="n">HBaseConfiguration</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HBaseConfiguration</span><span class="o">();</span>
+</span><span class='line'><span class="c1">// This instantiates an HTable object that connects you to the &quot;myTable&quot;</span>
+</span><span class='line'><span class="c1">// table. </span>
+</span><span class='line'><span class="n">HTable</span> <span class="n">table</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HTable</span><span class="o">(</span><span class="n">config</span><span class="o">,</span> <span class="s">&quot;myTable&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// To do any sort of update on a row, you use an instance of the BatchUpdate</span>
+</span><span class='line'><span class="c1">// class. A BatchUpdate takes a row and optionally a timestamp which your</span>
+</span><span class='line'><span class="c1">// updates will affect. </span>
+</span><span class='line'><span class="n">BatchUpdate</span> <span class="n">batchUpdate</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BatchUpdate</span><span class="o">(</span><span class="s">&quot;myRow&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// The BatchUpdate#put method takes a Text that describes what cell you want</span>
+</span><span class='line'><span class="c1">// to put a value into, and a byte array that is the value you want to </span>
+</span><span class='line'><span class="c1">// store. Note that if you want to store strings, you have to getBytes() </span>
+</span><span class='line'><span class="c1">// from the string for HBase to understand how to store it. (The same goes</span>
+</span><span class='line'><span class="c1">// for primitives like ints and longs and user-defined classes - you must </span>
+</span><span class='line'><span class="c1">// find a way to reduce it to bytes.)</span>
+</span><span class='line'><span class="n">batchUpdate</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">,</span> <span class="s">&quot;columnQualifier1 value!&quot;</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
+</span><span class='line'><span class="c1">// Deletes are batch operations in HBase as well. </span>
+</span><span class='line'><span class="n">batchUpdate</span><span class="o">.</span><span class="na">delete</span><span class="o">(</span><span class="s">&quot;myColumnFamily:cellIWantDeleted&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// Once you&#39;ve done all the puts you want, you need to commit the results.</span>
+</span><span class='line'><span class="c1">// The HTable#commit method takes the BatchUpdate instance you&#39;ve been </span>
+</span><span class='line'><span class="c1">// building and pushes the batch of changes you made into HBase.</span>
+</span><span class='line'><span class="n">table</span><span class="o">.</span><span class="na">commit</span><span class="o">(</span><span class="n">batchUpdate</span><span class="o">);</span>
+</span><span class='line'><span class="c1">// Now, to retrieve the data we just wrote. The values that come back are</span>
+</span><span class='line'><span class="c1">// Cell instances. A Cell is a combination of the value as a byte array and</span>
+</span><span class='line'><span class="c1">// the timestamp the value was stored with. If you happen to know that the </span>
+</span><span class='line'><span class="c1">// value contained is a string and want an actual string, then you must </span>
+</span><span class='line'><span class="c1">// convert it yourself.</span>
+</span><span class='line'><span class="n">Cell</span> <span class="n">cell</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;myRow&quot;</span><span class="o">,</span> <span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">);</span>
+</span><span class='line'><span class="n">String</span> <span class="n">valueStr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">cell</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Sometimes, you won&#39;t know the row you&#39;re looking for. In this case, you</span>
+</span><span class='line'><span class="c1">// use a Scanner. This will give you cursor-like interface to the contents</span>
+</span><span class='line'><span class="c1">// of the table.</span>
+</span><span class='line'><span class="n">Scanner</span> <span class="n">scanner</span> <span class="o">=</span>
+</span><span class='line'>  <span class="c1">// we want to get back only &quot;myColumnFamily:columnQualifier1&quot; when we iterate</span>
+</span><span class='line'>  <span class="n">table</span><span class="o">.</span><span class="na">getScanner</span><span class="o">(</span><span class="k">new</span> <span class="n">String</span><span class="o">[]{</span><span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">});</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Scanners in HBase 0.2 return RowResult instances. A RowResult is like the</span>
+</span><span class='line'><span class="c1">// row key and the columns all wrapped up in a single interface. </span>
+</span><span class='line'><span class="c1">// RowResult#getRow gives you the row key. RowResult also implements </span>
+</span><span class='line'><span class="c1">// Map, so you can get to your column results easily. </span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Now, for the actual iteration. One way is to use a while loop like so:</span>
+</span><span class='line'><span class="n">RowResult</span> <span class="n">rowResult</span> <span class="o">=</span> <span class="n">scanner</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">while</span><span class="o">(</span><span class="n">rowResult</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// print out the row we found and the columns we were looking for</span>
+</span><span class='line'>  <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Found row: &quot;</span> <span class="o">+</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">rowResult</span><span class="o">.</span><span class="na">getRow</span><span class="o">())</span> <span class="o">+</span> <span class="s">&quot; with value: &quot;</span> <span class="o">+</span>
+</span><span class='line'>   <span class="n">rowResult</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">.</span><span class="na">getBytes</span><span class="o">()));</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">rowResult</span> <span class="o">=</span> <span class="n">scanner</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// The other approach is to use a foreach loop. Scanners are iterable!</span>
+</span><span class='line'><span class="k">for</span> <span class="o">(</span><span class="n">RowResult</span> <span class="n">result</span> <span class="o">:</span> <span class="n">scanner</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>  <span class="c1">// print out the row we found and the columns we were looking for</span>
+</span><span class='line'>  <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Found row: &quot;</span> <span class="o">+</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">getRow</span><span class="o">())</span> <span class="o">+</span> <span class="s">&quot; with value: &quot;</span> <span class="o">+</span>
+</span><span class='line'>   <span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">.</span><span class="na">getBytes</span><span class="o">()));</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Make sure you close your scanners when you are done!</span>
+</span><span class='line'><span class="n">scanner</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>Voldemort:</h3>
+
+<h4>Setup</h4>
+
+<ul>
+<li><p>Step 1: Download the code
+Download either a recent stable release or, for those who like to live more dangerously, the up-to-the-minute build from the build server.</p></li>
+<li><p>Step 2: Start single node cluster
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;blockquote&gt;&lt;p&gt;bin/voldemort-server.sh config/single_node_cluster &gt; /tmp/voldemort.log &amp;amp;
+</span></code></pre></td></tr></table></div></figure></notextile></div></p></blockquote></li>
+<li>Step 3: Start commandline test client and do some operations</li>
+</ul>
+
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;blockquote&gt;&lt;p&gt;bin/voldemort-shell.sh <span class="nb">test </span>tcp://localhost:6666
+</span><span class='line'>  Established connection to <span class="nb">test </span>via tcp://localhost:6666
+</span><span class='line'>put &amp;ldquo;hello&amp;rdquo; &amp;ldquo;world&amp;rdquo;
+</span><span class='line'>get &amp;ldquo;hello&amp;rdquo;   version<span class="o">(</span>0:1<span class="o">)</span>: &amp;ldquo;world&amp;rdquo;
+</span><span class='line'>delete &amp;ldquo;hello&amp;rdquo;
+</span><span class='line'>get &amp;ldquo;hello&amp;rdquo;   null
+</span><span class='line'><span class="nb">exit  </span>k k thx bye.
+</span></code></pre></td></tr></table></div></figure></notextile></div></p></blockquote>
+
+<h4>Programming</h4>
+
+<p><strong>Client</strong>
+Here is an example showing how to connect to a store as a client to do reads and writes from Java:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">String</span> <span class="n">bootstrapUrl</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nl">tcp:</span><span class="c1">//localhost:6666&amp;rdquo;;</span>
+</span><span class='line'><span class="n">StoreClientFactory</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SocketStoreClientFactory</span><span class="o">(</span><span class="k">new</span> <span class="n">ClientConfig</span><span class="o">().</span><span class="na">setBootstrapUrls</span><span class="o">(</span><span class="n">bootstrapUrl</span><span class="o">));</span>
+</span><span class='line'><span class="c1">// create a client that executes operations on a single store</span>
+</span><span class='line'><span class="n">StoreClient</span> <span class="n">client</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">getStoreClient</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">my_store_name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+After initializing the store client for every store once we can reuse it to run our queries as follows:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// do some random pointless operations</span>
+</span><span class='line'>  <span class="n">Versioned</span> <span class="n">value</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">get</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">some_key</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
+</span><span class='line'>  <span class="n">value</span><span class="o">.</span><span class="na">setObject</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">some_value</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
+</span><span class='line'>  <span class="n">client</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">some_key</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="n">value</span><span class="o">);</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Note that StoreClient is just an interface, so for the purpose of unit testing we can completely mock the storage layer. This is something that is essentially impossible to do with a normal relational db since sql is the interface and it is vendor specific.</p>
+
+<p><strong>Server</strong></p>
+
+<p>There are three methods for using the server:
+1. Start from the command line
+You must first build the jar file using ant, as described above, then do the following:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ VOLDEMORT_HOME</span><span class="o">=</span>&amp;lsquo;/path/to/voldemort&amp;rsquo;
+</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> <span class="nv">$VOLDEMORT_HOME</span>
+</span><span class='line'><span class="nv">$ </span>./bin/voldemort-server.sh
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Alternately we can give VOLDEMORT_HOME on the command line and avoid having to set an environment variable
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>./bin/voldemort-server.sh /path/to/voldemort
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+2. Embedded Server
+You can instantiate the server directly in your code.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">VoldemortConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">VoldemortConfig</span><span class="o">.</span><span class="na">loadFromEnvironmentVariable</span><span class="o">();</span>
+</span><span class='line'><span class="n">VoldemortServer</span> <span class="n">server</span> <span class="o">=</span> <span class="k">new</span> <span class="n">VoldemortServer</span><span class="o">(</span><span class="n">config</span><span class="o">);</span>
+</span><span class='line'><span class="n">server</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+3. Deploy as a war
+To do this build the war file using the
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>ant war
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+target and deploy via whatever mechanism your servlet container supports.</p>
+
+<h4>Kyoto Cabinet:</h4>
+
+<h5>Setup</h5>
+
+<p>Install the latest version of Kyoto Cabinet beforehand and get the package of the Java binding of Kyoto Cabinet. JDK 6 or later is also required.
+Enter the directory of the extracted package then perform installation.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>./configure
+</span><span class='line'> make
+</span><span class='line'> make check
+</span><span class='line'> su make install
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+When a series of work finishes, the JAR file <code>kyotocabinet.jar' and the shared object files</code>libjkyotocabinet.so' and so on are installed under <code>/usr/local/lib'.
+Let the class search path include</code>/usr/local/lib/kyotocabinet.jar' and let the library search path include <code>/usr/local/lib'.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">CLASSPATH</span><span class="o">=</span><span class="s2">&quot;$CLASSPATH:/usr/local/lib/kyotocabinet.jar&quot;</span> <span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="s2">&quot;$LD_LIBRARY_PATH:/usr/local/lib&quot;</span> <span class="nb">export </span>CLASSPATH LD_LIBRARY_PATH
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+The above settings can be specified by options of the runtime command.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>java -cp .:kyotocabinet.jar -Djava.library.path<span class="o">=</span>.:/usr/local/lib FooBarBaz ...
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+All symbols of Kyoto Cabinet are defined in the package</code>kyotocabinet'. You can access them without any prefix by importing the package.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">kyotocabinet.*</span><span class="o">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h5>Programming</h5>
+
+<p>The following code is a typical example to use a database.
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">kyotocabinet.*</span><span class="o">;&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">KCDBEX1</span> <span class="o">{</span> <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
+</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>  <span class="c1">// create the object</span>
+</span><span class='line'> <span class="n">DB</span> <span class="n">db</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DB</span><span class="o">();</span>
+</span><span class='line'>  <span class="c1">// open the database</span>
+</span><span class='line'> <span class="k">if</span> <span class="o">(!</span><span class="n">db</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="s">&quot;casket.kch&quot;</span><span class="o">,</span> <span class="n">DB</span><span class="o">.</span><span class="na">OWRITER</span> <span class="o">|</span> <span class="n">DB</span><span class="o">.</span><span class="na">OCREATE</span><span class="o">)){</span>
+</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;open error: &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="o">.</span><span class="na">error</span><span class="o">());</span>
+</span><span class='line'> <span class="o">}</span>
+</span><span class='line'>  <span class="c1">// store records</span>
+</span><span class='line'> <span class="k">if</span> <span class="o">(!</span><span class="n">db</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="s">&quot;hop&quot;</span><span class="o">)</span> <span class="o">||</span>
+</span><span class='line'>     <span class="o">!</span><span class="n">db</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">&quot;bar&quot;</span><span class="o">,</span> <span class="s">&quot;step&quot;</span><span class="o">)</span> <span class="o">||</span>
+</span><span class='line'>     <span class="o">!</span><span class="n">db</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">&quot;baz&quot;</span><span class="o">,</span> <span class="s">&quot;jump&quot;</span><span class="o">)){</span>
+</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;set error: &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="o">.</span><span class="na">error</span><span class="o">());</span>
+</span><span class='line'> <span class="o">}</span>
+</span><span class='line'>  <span class="c1">// retrieve records</span>
+</span><span class='line'> <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;foo&quot;</span><span class="o">);</span>
+</span><span class='line'> <span class="k">if</span> <span class="o">(</span><span class="n">value</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
+</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
+</span><span class='line'> <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
+</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;set error: &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="o">.</span><span class="na">error</span><span class="o">());</span>
+</span><span class='line'> <span class="o">}</span>
+</span><span class='line'>  <span class="c1">// traverse records</span>
+</span><span class='line'> <span class="n">Cursor</span> <span class="n">cur</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">cursor</span><span class="o">();</span>
+</span><span class='line'> <span class="n">cur</span><span class="o">.</span><span class="na">jump</span><span class="o">();</span>
+</span><span class='line'> <span class="n">String</span><span class="o">[]</span> <span class="n">rec</span><span class="o">;</span>
+</span><span class='line'> <span class="k">while</span> <span class="o">((</span><span class="n">rec</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="na">get_str</span><span class="o">(</span><span class="kc">true</span><span class="o">))</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
+</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">rec</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="n">rec</span><span class="o">[</span><span class="mi">1</span><span class="o">]);</span>
+</span><span class='line'> <span class="o">}</span>
+</span><span class='line'> <span class="n">cur</span><span class="o">.</span><span class="na">disable</span><span class="o">();</span>
+</span><span class='line'>  <span class="c1">// close the database</span>
+</span><span class='line'> <span class="k">if</span><span class="o">(!</span><span class="n">db</span><span class="o">.</span><span class="na">close</span><span class="o">()){</span>
+</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;close error: &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="o">.</span><span class="na">error</span><span class="o">());</span>
+</span><span class='line'> <span class="o">}</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span> <span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h4>Redis</h4>
+
+<h5>Setup</h5>
+
+<p>Download, extract and compile Redis with:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> <span class="nv">$ </span>wget &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://redis.googlecode.com/files/redis-2.2.12.tar.gz&quot;</span>&gt;http://redis.googlecode.com/files/redis-2.2.12.tar.gz&lt;/a&gt;
+</span><span class='line'> <span class="nv">$ </span>tar xzf redis-2.2.12.tar.gz
+</span><span class='line'> <span class="nv">$ </span><span class="nb">cd </span>redis-2.2.12
+</span><span class='line'> <span class="nv">$ </span>make
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h5>Programming</h5>
+
+<p>Many Java clients, using Jedis for example:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Jedis</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">localhost</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
+</span><span class='line'> <span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">foo</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">bar</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
+</span><span class='line'> <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">foo</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h3>MongoDB</h3>
+
+<h4>Setup</h4>
+
+<p>64-bit binaries
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>curl &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://downloads.mongodb.org/osx/mongodb-osx-x86_64-x.y.z.tgz&quot;</span>&gt;http://downloads.mongodb.org/osx/mongodb-osx-x86_64-x.y.z.tgz&lt;/a&gt; &gt; mongo.tgz <span class="nv">$ </span>tar xzf mongo.tgz
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Replace x.y.z with the current stable version.
+Create a data directory
+By default MongoDB will store data in /data/db, but it won&rsquo;t automatically create that directory. To create it, do:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>mkdir -p /data/db
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+You can also tell MongoDB to use a different data directory, with the &mdash;dbpath option.
+Run and connect to the server
+First, start the MongoDB server in one terminal:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>./mongodb-xxxxxxx/bin/mongod
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+In a separate terminal, start the shell, which will connect to localhost by default:
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>./mongodb-xxxxxxx/bin/mongo &gt; db.foo.save<span class="o">(</span> <span class="o">{</span> a : 1 <span class="o">}</span> <span class="o">)</span> &gt; db.foo.find<span class="o">()</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+Congratulations, you&rsquo;ve just saved and retrieved your first document with MongoDB!</p>
+
+<h4>Programming</h4>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.Mongo</span><span class="o">;</span>
+</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.DB</span><span class="o">;</span>
+</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.DBCollection</span><span class="o">;</span>
+</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.BasicDBObject</span><span class="o">;</span>
+</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.DBObject</span><span class="o">;</span>
+</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.DBCursor</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span> <span class="n">Mongo</span> <span class="n">m</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Mongo</span><span class="o">();</span>
+</span><span class='line'> <span class="c1">// or Mongo m = new Mongo( &amp;ldquo;localhost&amp;rdquo; );</span>
+</span><span class='line'> <span class="c1">// or Mongo m = new Mongo( &amp;ldquo;localhost&amp;rdquo; , 27017 );</span>
+</span><span class='line'> <span class="n">DB</span> <span class="n">db</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">mydb</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="o">);</span>
+</span><span class='line'> <span class="n">BasicDBObject</span> <span class="n">doc</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicDBObject</span><span class="o">();</span>
+</span><span class='line'> <span class="n">doc</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">MongoDB</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
+</span><span class='line'> <span class="n">doc</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">type</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">database</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
+</span><span class='line'> <span class="n">doc</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">count</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="mi">1</span><span class="o">);</span>
+</span><span class='line'> <span class="n">BasicDBObject</span> <span class="n">info</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicDBObject</span><span class="o">();</span>
+</span><span class='line'> <span class="n">info</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">x</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="mi">203</span><span class="o">);</span>
+</span><span class='line'> <span class="n">info</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">y</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="mi">102</span><span class="o">);</span>
+</span><span class='line'> <span class="n">doc</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">info</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="n">info</span><span class="o">);</span>
+</span><span class='line'> <span class="n">coll</span><span class="o">.</span><span class="na">insert</span><span class="o">(</span><span class="n">doc</span><span class="o">);</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+]]></content>
+  </entry>
+  
+</feed>
