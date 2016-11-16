@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Mac | Sean's Blog]]></title>
-  <link href="http://www.seanguo.cn/blog/categories/mac/atom.xml" rel="self"/>
-  <link href="http://www.seanguo.cn/"/>
-  <updated>2016-11-16T11:26:49+08:00</updated>
-  <id>http://www.seanguo.cn/</id>
+  <link href="http://www.seanguo.com/blog/categories/mac/atom.xml" rel="self"/>
+  <link href="http://www.seanguo.com/"/>
+  <updated>2016-11-16T11:28:12+08:00</updated>
+  <id>http://www.seanguo.com/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Itunes的备份之后的文件在哪儿]]></title>
-    <link href="http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location/"/>
+    <link href="http://www.seanguo.com/blog/2013/11/27/itunes-backup-location/"/>
     <updated>2013-11-27T19:46:51+08:00</updated>
-    <id>http://www.seanguo.cn/blog/2013/11/27/itunes-backup-location</id>
+    <id>http://www.seanguo.com/blog/2013/11/27/itunes-backup-location</id>
     <content type="html"><![CDATA[<ul>
 <li><p><strong>Windows 7</strong>的在 C:/Users/[用户名]/AppData/Roaming/Apple Computer/MobileSync/Backup/</p></li>
 <li><p><strong>Windows XP</strong>: C:/Documents and Settings(用户名)/Application Data/Apple Computer/MobileSync/Backup</p></li>

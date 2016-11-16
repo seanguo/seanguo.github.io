@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Chef | Sean's Blog]]></title>
-  <link href="http://www.seanguo.cn/blog/categories/chef/atom.xml" rel="self"/>
-  <link href="http://www.seanguo.cn/"/>
-  <updated>2016-11-16T11:26:49+08:00</updated>
-  <id>http://www.seanguo.cn/</id>
+  <link href="http://www.seanguo.com/blog/categories/chef/atom.xml" rel="self"/>
+  <link href="http://www.seanguo.com/"/>
+  <updated>2016-11-16T11:28:12+08:00</updated>
+  <id>http://www.seanguo.com/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Materials to Learn Chef]]></title>
-    <link href="http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef/"/>
+    <link href="http://www.seanguo.com/blog/2013/11/26/materials-to-learn-chef/"/>
     <updated>2013-11-26T20:57:31+08:00</updated>
-    <id>http://www.seanguo.cn/blog/2013/11/26/materials-to-learn-chef</id>
+    <id>http://www.seanguo.com/blog/2013/11/26/materials-to-learn-chef</id>
     <content type="html"><![CDATA[<h2>Setup:</h2>
 
 <h3>Develop tool:</h3>
