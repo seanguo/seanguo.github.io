@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Mac | Sean's Blog]]></title>
   <link href="http://www.seanguo.com/blog/categories/mac/atom.xml" rel="self"/>
   <link href="http://www.seanguo.com/"/>
-  <updated>2016-11-18T17:10:33+08:00</updated>
+  <updated>2017-01-19T20:13:29+08:00</updated>
   <id>http://www.seanguo.com/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -14,16 +14,57 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Itunes的备份之后的文件在哪儿]]></title>
-    <link href="http://www.seanguo.com/blog/2013/11/27/itunes-backup-location/"/>
-    <updated>2013-11-27T19:46:51+08:00</updated>
-    <id>http://www.seanguo.com/blog/2013/11/27/itunes-backup-location</id>
-    <content type="html"><![CDATA[<ul>
-<li><p><strong>Windows 7</strong>的在 C:/Users/[用户名]/AppData/Roaming/Apple Computer/MobileSync/Backup/</p></li>
-<li><p><strong>Windows XP</strong>: C:/Documents and Settings(用户名)/Application Data/Apple Computer/MobileSync/Backup</p></li>
-<li><p><strong>Mac</strong> 中：~/Library/Application Support/MobileSync/Backup</p></li>
-</ul>
+    <title type="html"><![CDATA[如何构建黑苹果(Hackintosh)]]></title>
+    <link href="http://www.seanguo.com/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh/"/>
+    <updated>2017-01-17T20:55:12+08:00</updated>
+    <id>http://www.seanguo.com/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh</id>
+    <content type="html"><![CDATA[<h2>引言</h2>
 
+<p>上大学的时候就想在PC上装个Mac操作系统来玩玩，因为已经观看了Windows安装的进度条多次，现在想要看看Mac怎么样。记得当时是想在虚拟机里装个Mac系统，但是停留在设置系统的部分，因为系统不能识别鼠标和键盘，只能作罢。
+上次的尝试是自己的新PC刚组装好的时候，这次已经掌握了Google，知道了这个东西叫Hackintosh，上各大论坛搜索相关的资料和安装教程，这次再次以失败告终，这次停在了安装时候的crash。
+最近晚上又有一些闲工夫，看到了<a href="https://www.tonymacx86.com/">tonyMacX86</a>里居然说已经有我的显卡GTX970的官方驱动了，所以再一次走进这个坑，皇天不负有心人，铁杵终能磨成针，这一次终于安装好了。下面就是这次我的安装历程，不算一个教程，因为那个论坛里的教程已经非常好了。</p>
+
+<h2>安装前</h2>
+
+<p>这个就是我当初跟随的<a href="https://www.tonymacx86.com/threads/unibeast-install-macos-sierra-on-any-supported-intel-based-pc.200564/">教程</a>。它这个也是分为三个阶段来讲述的，需要用到一些工具，这些工具这个论坛也提供了下载，但是要注册登录后才可以。黑苹果的设置安装过程中会用到Mac，所以你手头必须有个Mac才行。</p>
+
+<h3>第一步</h3>
+
+<p>它的第一步是下载这个最新的Mac Sierra系统，我这在公司的Mac上已经下载好了但是由于怕搞坏我本机的开发环境一直没敢升级。默认升级后会问你是不是要删掉这个下载好的安装程序。</p>
+
+<h3>第二步</h3>
+
+<p>创建可以自启动的Mac安装盘，用到的工具是<a href="https://www.tonymacx86.com/resources/unibeast-7-0-1.320/">UniBeast</a>。我在这一步卡壳了一下，因为手头没有16G以上的U盘，打算用手头的移动硬盘来作为启动盘，但是这就出问题了。按说明格式化好后打开UniBeast之后发现不了移动硬盘，google一下原来是新版的UniBeast不支持64GB以上的移动存储。wtf！只能把移动硬盘分区了，这块又有问题，Mac的磁盘工具的Partition按钮不可用，继续google吧，这次找到了Mac下面这个命令来解决：
+{% codeblock lang:bash%}
+diskutil partitionDisk disk2 1 GPT HFS+ newdisk R
+{% endcodeblock %}
+这里要注意disk2是你的移动硬盘。
+然后下面顺利分了两个区，这个启动的区设为了64GB。然后再次启动UniBeast一路continue安装好了启动盘。</p>
+
+<h3>第三步</h3>
+
+<p>主板的BIOS/UEFI设置，直接找到了论坛里一个我的主板<a href="https://www.tonymacx86.com/threads/tonymacx86s-asus-test-build-z97-a-i3-4340-hd4600-thunderbolt-ex-ii.136796/">阿苏斯Z97-A</a>的配置，把<strong>安全启动</strong>里的<strong>安全模式</strong>改为<strong>其他操作系统</strong>即可。</p>
+
+<h2>安装</h2>
+
+<p>重启按<strong>F8</strong>选择UEFI（和制作启动盘是Unibeast里的mode要要一致）的移动硬盘启动，黑屏白苹果进度条，成功进入安装界面这次没有Kernel Panic之类的错误，然后就是进入<strong>磁盘工具</strong>格式化分区，这块又是一个坑。<strong>磁盘工具</strong>报错没有空间来执行操作，继续google大法发现有人说是苹果的这个磁盘工具要求硬盘上必须有个>=200MB的EFI分区才行，wtf！而用windows分区出来的硬盘是没有那么大的EFI分区或者压根没有（可以用Windows的磁盘管理来查看目标磁盘有没有EFI分区）， 我的属于后者。继续google吧，发现了下面一个救命<a href="https://www.youtube.com/watch?v=Rqico9ENA-4">视频</a>，这个方法保持了不伤数据, 这个视频是在油管发现的，需要翻墙才能看，下面把里面的命令扒下来，具体来说就是没有EFI分区我可以用windows的磁盘工具创建一个出来：
+{% codeblock lang:bash%}
+diskpart
+list disk
+sel disk 1(你的目标磁盘号)
+list volumne
+sel vol 5（你的目标分区号）
+shrink desired=300（压缩这个分区300M来创建EFI分区）
+create partition efi size=300
+format quick fs=fat32 Label=&ldquo;System&rdquo;
+{% endcodeblock %}
+经过这个之后<strong>磁盘工具</strong>终于可以运行了，但是在这块儿我又碰到一个我指定的硬盘分区使用率为100%的问题（实际上是空的），但是有个分区确是好的，这块没有深究，把可用的磁盘中的文件拷贝过去，重启继续了安装在了好的分区。这次是顺利完成了安装，也成功进入了设置界面。</p>
+
+<h2>安装后</h2>
+
+<p>设置完整后该是用<a href="https://www.tonymacx86.com/resources/multibeast-sierra-9-0-1.329/">Multibeast</a>来装驱动了，这块又碰到个不起作用的问题，google来google去都没解决，后来无意中发现这个MultiBeast默认是把设置install到了系统盘，但是我的引导盘应该是叫做<strong>USB</strong>的移动硬盘才对，驱动应该是装在那来才对，修改目标地址为其终于是解决了声卡驱动的问题。<br></p>
+
+<p>然后到了显卡驱动，这块很多问题可以参考这个<a href="https://www.tonymacx86.com/threads/nvidia-releases-alternate-graphics-drivers-for-macos-sierra-10-12-0-367-15-10-05.200843/">帖子</a>。这块我走了很多弯路，导致第一天没有完成这个安装，拖到了第二天晚上。开始是安装好了WebDriver，但是无法切换到Nvdia的驱动，总是用的Mac自带的驱动，这个的现象就是<strong>关于</strong>里面显示显卡的显存为0MB。google了一圈然后又回来了tonyMacX86论坛扫帖子，有人说是Inject Nvdia应该从Clover的配置里去掉。这块改Clover的配置又是琢磨了半天。下载了个Clover Configurator用里面的Mount EFI分区后才能发现这个配置文件。 去掉Inject Nvdia然后把webDriver设成true还是不行。这次现象是Nvdia控制面板显示驱动已经勾上了，但是关于里没有正确识别显卡型号，说是Nvdia Model 5MB，具体记不太清了，继续google，搜论坛吧，有的说是Inject了Intel的显卡驱动，看了看没有，有的说打开webdriver后应该吧Clover的启动名利里去掉nv_disable=1，这块我栽了个大跟头，我把1改成了0，还是不行，浪费了很多时间，最后终于想起把nv_disable=0整个去掉试试，哪知道居然成功了。终于是大功告成了，赶紧发了个朋友圈庆祝了一下。</p>
 ]]></content>
   </entry>
   
