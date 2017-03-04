@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Sean's Blog]]></title>
   <link href="http://www.seanguo.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://www.seanguo.com/"/>
-  <updated>2017-01-19T20:13:29+08:00</updated>
+  <updated>2017-03-04T09:40:22+08:00</updated>
   <id>http://www.seanguo.com/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -18,9 +18,10 @@
     <link href="http://www.seanguo.com/blog/2013/11/27/my-ruby-learning/"/>
     <updated>2013-11-27T09:39:36+08:00</updated>
     <id>http://www.seanguo.com/blog/2013/11/27/my-ruby-learning</id>
-    <content type="html"><![CDATA[<p>{% codeblock Output something lang:ruby%}
-puts File.exists?(&ldquo;/Users/sean/Desktop/test.rb&rdquo;)
-{% endcodeblock %}</p>
+    <content type="html"><![CDATA[<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Output something</span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="no">Users</span><span class="o">/</span><span class="n">sean</span><span class="o">/</span><span class="no">Desktop</span><span class="o">/</span><span class="nb">test</span><span class="o">.</span><span class="n">rb</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
   
