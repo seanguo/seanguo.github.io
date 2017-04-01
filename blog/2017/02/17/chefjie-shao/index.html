@@ -99,7 +99,9 @@
 
 <p>Chef是一个自动化部署的工具。它的思想是“Infrastructure as code”, 所以整个DevOps流程下来都是代码，都可以保存在代码仓库里面。像Chef之类的工具出现之前，简单部署的话就是手工来了，像Java的web应用手工部署个War包或者改个配置文件什么的，高级点的可能会写个shell脚本来自动化。但是当需要管理的机器增多或者配置项增多，或者不同的机器要求不一样的配置的话，就力不从心了。Chef出现之后，这样的难题就迎刃而解了。</p>
 
-<p>Chef的实现是用的Ruby，所以它的配置脚本也是基于Ruby的, 所以想要学好Chef也需要了解一下Ruby的基本语法，如果想要扩展，定制，增加自己的Chef库的话，还是需要仔细学习一下Ruby才行。这导致Chef陡峭的学习曲线，了解个皮毛很容易，但是想要深入了解，诊断问题的话需要做很多功课才可以。想要学习，我们先当环境，在应用中学习是最有成效的。</p>
+<p>Chef的实现是用的Ruby，所以它的配置脚本也是基于Ruby的, 所以想要学好Chef也需要了解一下Ruby的基本语法，如果想要扩展，定制，增加自己的Chef库的话，还是需要仔细学习一下Ruby才行。这导致Chef陡峭的学习曲线，了解个皮毛很容易，但是想要深入了解，诊断问题的话需要做很多功课才可以。</p>
+
+<p>想要学好，我们先搭环境，在应用中学习是最有成效的。</p>
 
 <h2>安装</h2>
 
@@ -250,7 +252,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>这表示成功执行完了，可以到那个地方检察一下这个文件是否被创建了。</p>
+<p>这表示成功执行完了，可以到那个地方检查一下这个文件是否被创建了。</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -259,7 +261,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>到这之后然后可能会想要修改这个mode， 这可以通过Attribute来实现。</p>
+<p>到这之后然后可能会想要修改文件的mode， 这可以通过Attribute来实现。</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -300,7 +302,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p> 再次运行这个cookbook可以看到输出已经把文件的mode改成644了，通过这种方式我们就可以从外面覆盖cookbook的默认值，达到定制化配置的目的。</p>
+<p> 再次运行这个cookbook可以看到输出已经把文件的mode改成644了，通过这种方式我们就可以通过从外面的配置覆盖cookbook的默认值，达到定制化配置的目的。</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -341,7 +343,7 @@
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/tools/'>Tools</a>
+    <a class='category' href='/blog/categories/chef/'>chef</a>, <a class='category' href='/blog/categories/tool/'>tool</a>
   
 </span>
 
@@ -364,6 +366,8 @@
         <a class="basic-alignment left" href="/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh/" title="Previous Post: 如何构建黑苹果(Hackintosh)">&laquo; 如何构建黑苹果(Hackintosh)</a>
       
       
+        <a class="basic-alignment right" href="/blog/2017/03/12/vagrant-plus-chef/" title="Next Post: Vagrant+Chef">Vagrant+Chef &raquo;</a>
+      
     </p>
   </footer>
 </article>
@@ -383,6 +387,10 @@
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2017/03/12/vagrant-plus-chef/">Vagrant+Chef</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2017/02/17/chefjie-shao/">Chef 介绍 Part1 Setup</a>
       </li>
     
@@ -396,10 +404,6 @@
     
       <li class="post">
         <a href="/blog/2013/11/27/itunes-backup-location/">Itunes的备份之后的文件在哪儿</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2013/11/27/nosql-database-compare/">NoSql Database Compare</a>
       </li>
     
   </ul>

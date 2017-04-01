@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Tool | Sean's Blog]]></title>
   <link href="http://www.seanguo.com/blog/categories/tool/atom.xml" rel="self"/>
   <link href="http://www.seanguo.com/"/>
-  <updated>2017-03-04T09:40:22+08:00</updated>
+  <updated>2017-04-01T17:50:50+08:00</updated>
   <id>http://www.seanguo.com/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -12,6 +12,356 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Vagrant+Chef]]></title>
+    <link href="http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef/"/>
+    <updated>2017-03-12T19:32:51+08:00</updated>
+    <id>http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef</id>
+    <content type="html"><![CDATA[<h2>引言</h2>
+
+<p>前面我介绍了Chef的环境搭建和简单的cookbook的创建执行，也介绍了如果用Vagrant来快速搭建一台虚拟机。但是所有的东西都停留在hello world的阶段，这篇文章就是结合这两个生产力工具来搭建一组<del>可以实际使用</del>用来做rails开发的server。</p>
+
+<h2>Chef Provisioning</h2>
+
+<p>我们知道Vagrant包含多种不同类型的provisioner，而Chef就是其中内置的一种，所以我们是可以直接使用的。这里我们用到的是chef_solo, Chef Solo是Chef Client的单机版，运行不依赖于Chef Server。</p>
+
+<p>第一步我们要下载我们需要安装的组件的cookbook，这里我们会用到第三方的cookbook，因为在<a href="https://supermarket.chef.io/cookbooks/">社区</a>里已经有很多成熟的cookbook了。但是手工下载的方式不太方便，这里我们用到cookbook的依赖管理的工具: <a href="https://docs.chef.io/berkshelf.html">Berkshelf</a>。它和Ruby的gem管理文件Gemfile语法类似，它的配置文件是Berksfile。我们在当前文件夹（我这里是<strong>vagrant_test</strong>）创建一个空的Berksfile。chef-dk里面已经包含Berkshelf的命令行工具了，对应的命令是<strong>berks</strong>, 但是Vagrant想要用Berkshelf的时候我们还要装个插件来实现，可以用下面的命令来安装最新Berkshelf的插件。
+{% codeblock lang:bash%}
+vagrant plugin install vagrant-berkshelf
+{% endcodeblock %}</p>
+
+<p>然后编辑Berksfile加上如下两行：
+{% codeblock lang:ruby%}
+source &lsquo;<a href="https://supermarket.chef.io">https://supermarket.chef.io</a>&rsquo;</p>
+
+<p>cookbook &lsquo;rails&rsquo;, &lsquo;~> 0.9.2&rsquo;
+{% endcodeblock %}
+source语句指定了去supermarket.chef.io搜索下载cookbook, 第二行声明我们依赖于一个叫rails的cookbook，version为0.9.2，关于version的语法可以<a href="https://docs.chef.io/config_rb_metadata.html#cookbook-version-constraints">戳这里</a>。</p>
+
+<p>我们接着创建一个新的Vagrantfile, 这里我们打算创建两个虚拟机，一个作为rails的主server，另一个用来安装mysql。我们先看第一台虚拟机的配置：
+{% codeblock lang:ruby%}</p>
+
+<h1>&ndash;<em>&ndash; mode: ruby &ndash;</em>&ndash;</h1>
+
+<h1>vi: set ft=ruby :</h1>
+
+<p>Vagrant.configure(&ldquo;2&rdquo;) do |config|</p>
+
+<p>  #base box for all machines
+  config.vm.box = &ldquo;bento/centos-6.7&rdquo;</p>
+
+<p>  #define a VM named rails
+  config.vm.define &ldquo;rails&rdquo; do |rails|</p>
+
+<pre><code>rails.vm.provider "virtualbox" do |v, override|
+  v.name           = "rails"
+  override.vm.network :private_network, ip: "192.168.50.20"
+end
+
+#configure chef provisoning per VM
+rails.vm.provision "shell", inline: "yum -y groupinstall 'Development Tools'"
+
+rails.vm.provision "chef_solo" do |chef|
+  chef.node_name = "rails"
+  chef.log_level = :debug
+  chef.json = {
+    "run_list" =&gt; ["rails"]
+  }
+end
+</code></pre>
+
+<p>  end
+end
+{% endcodeblock %}
+然后我们启动这台rails虚拟机，多虚拟机配置的启动需要指定虚拟机的名字，要不就是默认全部启动。
+{% codeblock lang:bash%}
+vagrant up rails
+{% endcodeblock %}
+这块儿由于是第一次启动这个虚拟机，它会首先下载需要的cookbook，然后映射到虚拟机里，启动虚拟机之后会首先下载安装Chef，这个过程很耗时间。</p>
+
+<p>这里定义了两个provisioning，一个是用sh安装Rails依赖的开发工具包。另一个是利用rails这个cookbook来配置Rails的环境。
+我这块遇到了在墙内会超时的问题。科学上网后解决了但是还是很耗时间，主要是下载Chef的安装包费时间。我们可以在其装好了chef和dev tools之后把这个box存起来作为以后的base box。命令如下:
+{% codeblock lang:bash%}
+vagrant package &mdash;base rails
+vagrant box add mybase package.box
+{% endcodeblock %}
+安装完box之后可以用下面的命令查看是否安装成功:
+{% codeblock lang:bash%}
+vagrant box list                <br/>
+bento/centos-6.7 (virtualbox, 2.2.7)
+mybase           (virtualbox, 0)
+{% endcodeblock %}
+以后就可以用mybase作为box的name来复用已经下载安装好Chef和dev tools的box。</p>
+
+<p>安装成功后我们可以用如下命令登录进去:
+{% codeblock lang:bash%}
+vagrant ssh rails
+{% endcodeblock %}</p>
+
+<p>然后我们定义另外一个虚拟机用来安装mysql，这里我们取名为mysql:
+{% codeblock lang:ruby%}
+config.vm.define &ldquo;mysql&rdquo; do |mysql|</p>
+
+<pre><code>mysql.vm.provider "virtualbox" do |v, override|
+  v.name           = "mysql"
+  override.vm.network :private_network, ip: "192.168.50.21"
+end
+
+mysql.vm.provision "chef_solo" do |chef|
+  chef.node_name = "mysql"
+  chef.log_level = :debug
+  chef.json = {
+    "run_list" =&gt; ["vagrant_chef::mysql"]
+  }
+end
+</code></pre>
+
+<p> end
+{% endcodeblock %}
+因为对这个cookbook的调用不能直接通过runlist，需要在recipe里调用它的resource来进行，我们需要把当前目录变成一个cookbook。一个cookbook的最小因素就是一个用来自描述的metadata.rb
+{% codeblock lang:ruby%}
+name             &ldquo;vagrant_chef&rdquo;
+maintainer       &ldquo;YOUR_NAME&rdquo;
+maintainer_email &ldquo;YOUR_EMAIL&rdquo;
+license          &ldquo;All rights reserved&rdquo;
+description      &ldquo;Installs/Configures mysql server&rdquo;
+version          &ldquo;0.0.1&rdquo;</p>
+
+<p>depends &ldquo;mysql&rdquo;
+{% endcodeblock %}
+这里我们还要加上对mysql的依赖，只有这样才能保证使用mysql的resource之前对mysql的依赖都全部被加载好。然后我们需要在Berksfile里指定mysql的cookbook版本，这样Berkshelf插件才会把这个新依赖的cookbook抓下来:
+{% codeblock lang:ruby%}
+source &lsquo;<a href="https://supermarket.chef.io">https://supermarket.chef.io</a>&rsquo;
+metadata</p>
+
+<p>cookbook &lsquo;rails&rsquo;, &lsquo;~> 0.9.2&rsquo;</p>
+
+<p>cookbook &lsquo;mysql&rsquo;, &lsquo;~> 8.2.0&rsquo;
+{% endcodeblock %}
+我们还加上了一行metadata，表示我们解析当前目录的metadata.rb, 把当前这个cookbook也加载进来。然后我们创建一个receipes文件夹，创建一个mysql.rb:
+{% codeblock lang:ruby%}
+mysql_service &lsquo;mysql&rsquo; do
+  port &lsquo;3306&rsquo;
+  version &lsquo;5.5&rsquo;
+  initial_root_password &lsquo;change me&rsquo;
+  action [:create, :start]
+end
+{% endcodeblock %}
+这个Recipe用来安装设置mysql， 可以看到上面我们中对虚拟机的provisioning的配置里可以通过把<strong>vagrant_chef::mysql</strong>加到runlist来实现对这个Recipe的调用。
+所有都做好我们可以调用
+{% codeblock lang:bash%}
+vagrant up mysql
+{% endcodeblock %}
+这样mysql这个虚拟机也会被创建设置好。</p>
+
+<p>本来就想写个vagrant+chef的教程，结果大部分时间花在调试这两个别人写的cookbook。终于还是放弃了，所以这个教程的Chef安装部分是跑不起来的，仅供参考。但是其中你也能学到多个虚拟机的配置，组网，如何在Vagrant使用Chef, Berkshelf这些东西。</p>
+
+<p>完整的Vagrantfile如下：</p>
+
+<p>{% codeblock lang:ruby%}</p>
+
+<h1>&ndash;<em>&ndash; mode: ruby &ndash;</em>&ndash;</h1>
+
+<h1>vi: set ft=ruby :</h1>
+
+<p>Vagrant.configure(&ldquo;2&rdquo;) do |config|</p>
+
+<p>  #base box for all machines
+  config.vm.box = &ldquo;bento/centos-6.7&rdquo;</p>
+
+<p>  #define a VM named rails
+  config.vm.define &ldquo;rails&rdquo; do |rails|</p>
+
+<pre><code>rails.vm.provider "virtualbox" do |v, override|
+  v.name           = "rails"
+  override.vm.network :private_network, ip: "192.168.50.20"
+end
+
+#configure chef provisoning per VM
+rails.vm.provision "shell", inline: "yum -y groupinstall 'Development Tools'"
+
+rails.vm.provision "chef_solo" do |chef|
+  chef.node_name = "rails"
+  chef.log_level = :debug
+  chef.json = {
+    "run_list" =&gt; ["rails"]
+  }
+end
+</code></pre>
+
+<p>  end</p>
+
+<p>  config.vm.define &ldquo;mysql&rdquo; do |mysql|</p>
+
+<pre><code>mysql.vm.provider "virtualbox" do |v, override|
+  v.name           = "mysql"
+  override.vm.network :private_network, ip: "192.168.50.21"
+end
+
+mysql.vm.provision "chef_solo" do |chef|
+  chef.node_name = "mysql"
+  chef.log_level = :debug
+  chef.json = {
+    "run_list" =&gt; ["vagrant_chef::mysql"]
+  }
+end
+</code></pre>
+
+<p>  end
+end</p>
+
+<p>{% endcodeblock %}</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Chef 介绍 Part1 Setup]]></title>
+    <link href="http://www.seanguo.com/blog/2017/02/17/chefjie-shao/"/>
+    <updated>2017-02-17T20:20:59+08:00</updated>
+    <id>http://www.seanguo.com/blog/2017/02/17/chefjie-shao</id>
+    <content type="html"><![CDATA[<h2>引言</h2>
+
+<p>Chef是一个自动化部署的工具。它的思想是“Infrastructure as code”, 所以整个DevOps流程下来都是代码，都可以保存在代码仓库里面。像Chef之类的工具出现之前，简单部署的话就是手工来了，像Java的web应用手工部署个War包或者改个配置文件什么的，高级点的可能会写个shell脚本来自动化。但是当需要管理的机器增多或者配置项增多，或者不同的机器要求不一样的配置的话，就力不从心了。Chef出现之后，这样的难题就迎刃而解了。</p>
+
+<p>Chef的实现是用的Ruby，所以它的配置脚本也是基于Ruby的, 所以想要学好Chef也需要了解一下Ruby的基本语法，如果想要扩展，定制，增加自己的Chef库的话，还是需要仔细学习一下Ruby才行。这导致Chef陡峭的学习曲线，了解个皮毛很容易，但是想要深入了解，诊断问题的话需要做很多功课才可以。</p>
+
+<p>想要学好，我们先搭环境，在应用中学习是最有成效的。</p>
+
+<h2>安装</h2>
+
+<p>Chef安装很简单，就去下载一个叫做<a href="https://downloads.chef.io/">Chef DK</a>的包安装就可以了。这个会把Chef全家桶装好，里面开发测试用的所有工具都包含了。</p>
+
+<p>安装完后可以运行下面的命令检查一下
+{% codeblock lang:bash%}
+➜  ~ chef-solo -v
+Chef: 12.17.44
+{% endcodeblock %}</p>
+
+<h2>第一个程序</h2>
+
+<p>我们可以通过下面的命令来创建我们的第一个Chef程序(它叫Cookbook)
+{% codeblock lang:ruby%}
+chef generate cookbook sample1
+{% endcodeblock %}</p>
+
+<p>下面是这个cookbook的目录结构:
+{% codeblock lang:bash%}
+.
+├── Berksfile
+├── README.md
+├── chefignore
+├── metadata.rb
+├── recipes
+│   └── default.rb
+├── spec
+│   ├── spec_helper.rb
+│   └── unit
+│       └── recipes
+│           └── default_spec.rb
+├── test
+│   └── smoke
+│       └── default
+│           └── default_test.rb</p>
+
+<p>{% endcodeblock %}</p>
+
+<p>简单来说Chef的运行是顺序执行一个一个的Resource，Chef在Ruby语法的基础上封装了自己的DSL来把经常用到的命令，配置文件的管理等抽象成一个个的Resource。这些Resource根据需求顺序放在Chef的脚本里（它叫Recipe）就可以执行了。所以Chef的入口是Recipe，下面是一个简单的例子。</p>
+
+<p>{% codeblock lang:ruby%}
+file &lsquo;/tmp/test.txt&rsquo; do
+  content &lsquo;This is myfirst sample&rsquo;
+  mode &lsquo;0755&rsquo;
+end
+{% endcodeblock %}</p>
+
+<p>这个主代码块我们要放到recipes/default.rb里</p>
+
+<p>像这个file Resource就会在制定的路径创建一个php文件，然后填充文件的内容，设置用户和组，然后还有权限。简单而直观，没有Ruby的背景也能够轻易理解。
+要写在本地运行起来，我们还要创建两个文件：
+{% codeblock lang:bash%}
+cat ~/.chef/solo.rb
+cookbook_path [&lsquo;~/blog_samples/chef_intro/&rsquo;]%
+{% endcodeblock %}
+{% codeblock lang:bash%}
+cat test.json
+{
+&ldquo;run_list&rdquo;:[&ldquo;sample1&rdquo;]
+}
+{% endcodeblock %}</p>
+
+<p>然后可以用下面的命令在本地来运行这个cookbook:
+{% codeblock lang:bash%}
+chef-solo -j test.json -c ~/.chef/solo.rb
+{% endcodeblock %}</p>
+
+<p>然后我们看到了如下的输出
+{% codeblock lang:bash%}
+Starting Chef Client, version 12.17.44
+resolving cookbooks for run list: [&ldquo;sample1&rdquo;]
+Synchronizing Cookbooks:
+  &ndash; sample1 (0.1.0)
+Installing Cookbook Gems:
+Compiling Cookbooks&hellip;
+Converging 1 resources
+Recipe: sample1::default
+  * file[/tmp/test.txt] action create</p>
+
+<pre><code>- create new file /tmp/test.txt
+- update content in file /tmp/test.txt from none to ea8447
+--- /tmp/test.txt   2017-02-23 21:20:46.000000000 +0800
++++ /tmp/.chef-test20170223-2804-c8bnol.txt 2017-02-23 21:20:46.000000000 +0800
+@@ -1 +1,2 @@
++This is myfirst sample
+- change mode from '' to '0755'
+</code></pre>
+
+<p>Running handlers:
+Running handlers complete
+Chef Client finished, 1/1 resources updated in 12 seconds
+{% endcodeblock %}</p>
+
+<p>这表示成功执行完了，可以到那个地方检查一下这个文件是否被创建了。
+{% codeblock lang:bash%}
+cat /tmp/test.txt
+This is myfirst sample
+{% endcodeblock %}   <br/>
+到这之后然后可能会想要修改文件的mode， 这可以通过Attribute来实现。</p>
+
+<p>{% codeblock lang:ruby%}
+file &lsquo;/tmp/test.txt&rsquo; do
+  content &lsquo;This is myfirst sample&rsquo;
+  mode node[&lsquo;chef_intro&rsquo;][&lsquo;sample1&rsquo;][&lsquo;file_mode&rsquo;]
+end
+{% endcodeblock %}
+这些Attribute是在另一个Ruby文件（attributes/default.rb）定义的：
+{% codeblock lang:ruby%}
+  default[&lsquo;chef_intro&rsquo;][&lsquo;sample1&rsquo;][&lsquo;file_mode&rsquo;] = &lsquo;755&rsquo;
+{% endcodeblock %}
+然后修改我们的用户配置test.json为:
+{% codeblock lang:bash%}
+{
+  &ldquo;run_list&rdquo;:[&ldquo;sample1&rdquo;],
+  &ldquo;chef_intro&rdquo;: {</p>
+
+<pre><code>"sample1": {
+    "file_mode": "644"
+}
+</code></pre>
+
+<p>  }
+ {% endcodeblock %}
+ 再次运行这个cookbook可以看到输出已经把文件的mode改成644了，通过这种方式我们就可以通过从外面的配置覆盖cookbook的默认值，达到定制化配置的目的。
+ {% codeblock lang:bash%}
+ Recipe: sample1::default
+  * file[/tmp/test.txt] action create</p>
+
+<pre><code>- change mode from '0755' to '0644'
+</code></pre>
+
+<p> {% endcodeblock %}</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Vagrant 入门]]></title>
@@ -27,208 +377,123 @@
 <h2>初始设置</h2>
 
 <p>首先你需要去<a href="https://www.vagrantup.com/downloads.html">下载</a>适合你操作系统的Vagrant安装包。安装完之后我们还需要安装<a href="https://www.virtualbox.org/">VirtualBox</a>来作为演示用的provider。因为Virtualbox是Vagrant的provider，当然当你熟悉Vagrant之后可以通过修改全局的配置文件来修改默认的provider。一切都安装好了之后我们需要打开一个shell窗口，新建一个文件夹作为这次演示用的。
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>mkdir vagrant_leanring
-</span><span class='line'><span class="nb">cd </span>vagrant_leanring
-</span><span class='line'>vagrant init
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+mkdir vagrant_leanring
+cd vagrant_leanring
+vagrant init
+{% endcodeblock %}
 这里用到了第一个命令 <em>vagrant init</em> 这个命令会在当然目录生成如下这样的一个Vagrantfile，我们可以以这个为模板来修改运行我们自己的演示。
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;&amp;ndash;&lt;em&gt;&amp;ndash; mode: ruby &amp;ndash;&lt;/em</span><span class="o">&gt;&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;vi: set ft=ruby :&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="no">All</span> <span class="no">Vagrant</span> <span class="n">configuration</span> <span class="n">is</span> <span class="n">done</span> <span class="n">below</span><span class="o">.</span> <span class="no">The</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">2</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">in</span> <span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;configures the configuration version (we support older styles for&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="n">backwards</span> <span class="n">compatibility</span><span class="p">)</span><span class="o">.</span> <span class="no">Please</span> <span class="n">don</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="n">t</span> <span class="n">change</span> <span class="n">it</span> <span class="k">unless</span> <span class="n">you</span> <span class="n">know</span> <span class="n">what</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;h1&gt;you&amp;rsquo;re doing.&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-</span><span class='line'>  <span class="c1"># The most common configuration options are documented and commented below.</span>
-</span><span class='line'>  <span class="c1"># For a complete reference, please see the online documentation at</span>
-</span><span class='line'>  <span class="c1"># &lt;a href=&quot;https://docs.vagrantup.com.&quot;&gt;https://docs.vagrantup.com.&lt;/a&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Every Vagrant development environment requires a box. You can search for</span>
-</span><span class='line'>  <span class="c1"># boxes at &lt;a href=&quot;https://atlas.hashicorp.com/search.&quot;&gt;https://atlas.hashicorp.com/search.&lt;/a&gt;</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">base</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  # Disable automatic box update checking. If you disable this, then</span>
-</span><span class='line'><span class="sr">  # boxes will only be checked for updates when the user runs</span>
-</span><span class='line'><span class="sr">  # &lt;code&gt;vagrant box outdated&lt;/</span><span class="n">code</span><span class="o">&gt;.</span> <span class="no">This</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">recommended</span><span class="o">.</span>
-</span><span class='line'>  <span class="c1"># config.vm.box_check_update = false&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Create a forwarded port mapping which allows access to a specific port</span>
-</span><span class='line'>  <span class="c1"># within the machine from a port on the host machine. In the example below,</span>
-</span><span class='line'>  <span class="c1"># accessing &amp;ldquo;localhost:8080&amp;rdquo; will access port 80 on the guest machine.</span>
-</span><span class='line'>  <span class="c1"># config.vm.network &amp;ldquo;forwarded_port&amp;rdquo;, guest: 80, host: 8080&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Create a private network, which allows host-only access to the machine</span>
-</span><span class='line'>  <span class="c1"># using a specific IP.</span>
-</span><span class='line'>  <span class="c1"># config.vm.network &amp;ldquo;private_network&amp;rdquo;, ip: &amp;ldquo;192.168.33.10&amp;rdquo;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Create a public network, which generally matched to bridged network.</span>
-</span><span class='line'>  <span class="c1"># Bridged networks make the machine appear as another physical device on</span>
-</span><span class='line'>  <span class="c1"># your network.</span>
-</span><span class='line'>  <span class="c1"># config.vm.network &amp;ldquo;public_network&amp;rdquo;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Share an additional folder to the guest VM. The first argument is</span>
-</span><span class='line'>  <span class="c1"># the path on the host to the actual folder. The second argument is</span>
-</span><span class='line'>  <span class="c1"># the path on the guest to mount the folder. And the optional third</span>
-</span><span class='line'>  <span class="c1"># argument is a set of non-required options.</span>
-</span><span class='line'>  <span class="c1"># config.vm.synced_folder &amp;ldquo;../data&amp;rdquo;, &amp;ldquo;/vagrant_data&amp;rdquo;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Provider-specific configuration so you can fine-tune various</span>
-</span><span class='line'>  <span class="c1"># backing providers for Vagrant. These expose provider-specific options.</span>
-</span><span class='line'>  <span class="c1"># Example for VirtualBox:</span>
-</span><span class='line'>  <span class="c1">#</span>
-</span><span class='line'>  <span class="c1"># config.vm.provider &amp;ldquo;virtualbox&amp;rdquo; do |vb|</span>
-</span><span class='line'>  <span class="c1">#   # Display the VirtualBox GUI when booting the machine</span>
-</span><span class='line'>  <span class="c1">#   vb.gui = true</span>
-</span><span class='line'>  <span class="c1">#</span>
-</span><span class='line'>  <span class="c1">#   # Customize the amount of memory on the VM:</span>
-</span><span class='line'>  <span class="c1">#   vb.memory = &amp;ldquo;1024&amp;rdquo;</span>
-</span><span class='line'>  <span class="c1"># end</span>
-</span><span class='line'>  <span class="c1">#</span>
-</span><span class='line'>  <span class="c1"># View the documentation for the provider you are using for more</span>
-</span><span class='line'>  <span class="c1"># information on available options.&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Define a Vagrant Push strategy for pushing to Atlas. Other push strategies</span>
-</span><span class='line'>  <span class="c1"># such as FTP and Heroku are also available. See the documentation at</span>
-</span><span class='line'>  <span class="c1"># &lt;a href=&quot;https://docs.vagrantup.com/v2/push/atlas.html&quot;&gt;https://docs.vagrantup.com/v2/push/atlas.html&lt;/a&gt; for more information.</span>
-</span><span class='line'>  <span class="c1"># config.push.define &amp;ldquo;atlas&amp;rdquo; do |push|</span>
-</span><span class='line'>  <span class="c1">#   push.app = &amp;ldquo;YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME&amp;rdquo;</span>
-</span><span class='line'>  <span class="c1"># end&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Enable provisioning with a shell script. Additional provisioners such as</span>
-</span><span class='line'>  <span class="c1"># Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the</span>
-</span><span class='line'>  <span class="c1"># documentation for more information about their specific syntax and use.</span>
-</span><span class='line'>  <span class="c1"># config.vm.provision &amp;ldquo;shell&amp;rdquo;, inline: &amp;lt;&amp;lt;-SHELL</span>
-</span><span class='line'>  <span class="c1">#   sudo apt-get update</span>
-</span><span class='line'>  <span class="c1">#   sudo apt-get install -y apache2</span>
-</span><span class='line'>  <span class="c1"># SHELL</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:ruby%}</p>
+
+<h1>&ndash;<em>&ndash; mode: ruby &ndash;</em>&ndash;</h1>
+
+<h1>vi: set ft=ruby :</h1>
+
+<h1>All Vagrant configuration is done below. The &ldquo;2&rdquo; in Vagrant.configure</h1>
+
+<h1>configures the configuration version (we support older styles for</h1>
+
+<h1>backwards compatibility). Please don&rsquo;t change it unless you know what</h1>
+
+<h1>you&rsquo;re doing.</h1>
+
+<p>Vagrant.configure(2) do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # <a href="https://docs.vagrantup.com.">https://docs.vagrantup.com.</a></p>
+
+<p>  # Every Vagrant development environment requires a box. You can search for
+  # boxes at <a href="https://atlas.hashicorp.com/search.">https://atlas.hashicorp.com/search.</a>
+  config.vm.box = &ldquo;base&rdquo;</p>
+
+<p>  # Disable automatic box update checking. If you disable this, then
+  # boxes will only be checked for updates when the user runs
+  # <code>vagrant box outdated</code>. This is not recommended.
+  # config.vm.box_check_update = false</p>
+
+<p>  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing &ldquo;localhost:8080&rdquo; will access port 80 on the guest machine.
+  # config.vm.network &ldquo;forwarded_port&rdquo;, guest: 80, host: 8080</p>
+
+<p>  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network &ldquo;private_network&rdquo;, ip: &ldquo;192.168.33.10&rdquo;</p>
+
+<p>  # Create a public network, which generally matched to bridged network.
+  # Bridged networks make the machine appear as another physical device on
+  # your network.
+  # config.vm.network &ldquo;public_network&rdquo;</p>
+
+<p>  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  # config.vm.synced_folder &ldquo;../data&rdquo;, &ldquo;/vagrant_data&rdquo;</p>
+
+<p>  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  #
+  # config.vm.provider &ldquo;virtualbox&rdquo; do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = &ldquo;1024&rdquo;
+  # end
+  #
+  # View the documentation for the provider you are using for more
+  # information on available options.</p>
+
+<p>  # Define a Vagrant Push strategy for pushing to Atlas. Other push strategies
+  # such as FTP and Heroku are also available. See the documentation at
+  # <a href="https://docs.vagrantup.com/v2/push/atlas.html">https://docs.vagrantup.com/v2/push/atlas.html</a> for more information.
+  # config.push.define &ldquo;atlas&rdquo; do |push|
+  #   push.app = &ldquo;YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME&rdquo;
+  # end</p>
+
+<p>  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  # config.vm.provision &ldquo;shell&rdquo;, inline: &lt;&lt;-SHELL
+  #   sudo apt-get update
+  #   sudo apt-get install -y apache2
+  # SHELL
+end</p>
+
+<p>{% endcodeblock %}
 我们可以看到里面有一些很好的注释来帮助我们快速的生成自己需要的配置。这里能看到这个文件的格式是Ruby语法的，因为Vagrant这个工具是用Ruby来实现，所以为了更好的了解这个配置文件我们会在下一章讲解一下基本的Ruby语法。因为Ruby也是学习Chef需要的语言，我会在下一篇blog里讲解一下基础的Chef知识。</p>
 
 <h2>Vagrant需要了解的Ruby语法</h2>
 
 <p>我们通过上面的Vagrantfile看到Ruby里面的注释是用<em>#</em>来开始的。然后我们看到了
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:ruby%}
+Vagrant.configure(2) do |config|
+end
+{% endcodeblock %}
 这个其实是调用了Vagrant这个mudule上的configure方法，这个方法接受两个参数：第一个参数是2（表示Version），第二个参数是一个代码块(block)，因为根据Ruby的语法, 方法最后一个参数为block的时候我们可以放到括号外面，这种调用也等价于
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:ruby%}
+Vagrant.configure(2) { |config|
+}
+{% endcodeblock %}
 这是block的两种表示方法，通过这种block的形式我们可以很方便的把一段代码作为参数传给一个方法。这里这个方法的作用就是去设置Vagrant的各项参数。我们可以看到被注释的代码里面也很多再次用到了嵌套的block的方式。<br><br>
 需要更多的了解Ruby这门语言的话，这里有个很好的学习Ruby的<a href="http://ruby-doc.com/docs/ProgrammingRuby/">网站</a>，虽然是英文的但是值得一读。</p>
 
 <h2>Box</h2>
 
 <p>现在block的配置里唯一打开注释的就是
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">base</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:ruby%}
+config.vm.box = &ldquo;base&rdquo;
+{% endcodeblock %}
 Box是你的虚拟机启动时用的base image,所以你就不必从头去设置一个虚拟机。你可以去社区下载已经基本配置好的Box，然后基于它去搭建虚拟机。你可以去<a href="https://atlas.hashicorp.com/boxes/search">HashiCorp&rsquo;s Atlas box catalog</a>去查看社区已有的Box。这个<em>base</em>就是其中一个Box，<em>base</em>是这个Box的id。我们可以用下面的命令去添加一个Box到我们的本地环境中：
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant box add hashicorp/precise32
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+vagrant box add hashicorp/precise32
+{% endcodeblock %}
 如果你用的OS是Mac的话，默认下载好的Box会被安装在<em>~/.vagrant.d/boxes</em>。然后我们修改Vagrantfile使用我们导入好的Box，因为base目前是不存在的：
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">hashicorp</span><span class="o">/</span><span class="n">precise32</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:ruby%}
+config.vm.box = &ldquo;hashicorp/precise32&rdquo;
+{% endcodeblock %}</p>
 
 <h2>Commands</h2>
 
@@ -252,208 +517,134 @@ Box是你的虚拟机启动时用的base image,所以你就不必从头去设置
 <h2>Provider</h2>
 
 <p>Provider是Vagrant用来和不同种类虚拟机通信的驱动，我们在一个Vagrantfile可以配置多种Provider。安装好Vagrant好默认的Provider就是VirtualBox，所以我们在执行命令时不用传入Provider的名字。实际情况下我们有可能在一个Vagrantfile配置多个Provider来应对开发测试的不同阶段，例如我们可以配置一个VirtualBox的Provider做本地开发/测试，然后再定义一个EC2的Provider来部署到Amazon的云里，这样的配置就像下面这样:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;config.vm.provider &amp;ldquo;virtualbox&amp;rdquo; do |vb|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1"># Display the VirtualBox GUI when booting the machine</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="n">vb</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="kp">true</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  # Customize the amount of memory on the VM:</span>
-</span><span class='line'><span class="sr">  vb.memory = &amp;ldquo;1024&amp;rdquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Configure the virtual machine name displayed in VirtualBox</span>
-</span><span class='line'>  <span class="n">vb</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">vagrant_leanring</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;config.vm.provider :aws do |aws,overide|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">aws</span><span class="o">.</span><span class="n">security_groups</span>           <span class="o">=</span>  <span class="sx">%w(everything_open)</span>
-</span><span class='line'><span class="n">aws</span><span class="o">.</span><span class="n">access_key_id</span>             <span class="o">=</span>  <span class="s2">&quot;YOUR KEY&quot;</span>
-</span><span class='line'><span class="n">aws</span><span class="o">.</span><span class="n">secret_access_key</span>         <span class="o">=</span>  <span class="s2">&quot;YOUR SECRET KEY&quot;</span>
-</span><span class='line'><span class="n">aws</span><span class="o">.</span><span class="n">ami</span>                       <span class="o">=</span>  <span class="s2">&quot;ami-xxx&quot;</span>
-</span><span class='line'><span class="n">aws</span><span class="o">.</span><span class="n">instance_type</span>             <span class="o">=</span>  <span class="s2">&quot;m1.medium&quot;</span>
-</span><span class='line'><span class="n">aws</span><span class="o">.</span><span class="n">keypair_name</span>              <span class="o">=</span>  <span class="s2">&quot;KEYPAIR NAME&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">overide</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">username</span>              <span class="o">=</span>  <span class="s2">&quot;root&quot;</span>
-</span><span class='line'><span class="n">overide</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">private_key_path</span>      <span class="o">=</span>  <span class="s2">&quot;PATH TO YOUR PRIVATE KEY&quot;</span>
-</span><span class='line'><span class="n">overide</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span>                    <span class="o">=</span>  <span class="s1">&#39;dummy&#39;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:ruby%}</p>
+
+<p>config.vm.provider &ldquo;virtualbox&rdquo; do |vb|</p>
+
+<pre><code># Display the VirtualBox GUI when booting the machine
+</code></pre>
+
+<p>  vb.gui = true</p>
+
+<p>  # Customize the amount of memory on the VM:
+  vb.memory = &ldquo;1024&rdquo;</p>
+
+<p>  # Configure the virtual machine name displayed in VirtualBox
+  vb.name = &ldquo;vagrant_leanring&rdquo;
+end</p>
+
+<p>config.vm.provider :aws do |aws,overide|</p>
+
+<pre><code>aws.security_groups           =  %w(everything_open)
+aws.access_key_id             =  "YOUR KEY"
+aws.secret_access_key         =  "YOUR SECRET KEY"
+aws.ami                       =  "ami-xxx"
+aws.instance_type             =  "m1.medium"
+aws.keypair_name              =  "KEYPAIR NAME"
+
+overide.ssh.username              =  "root"
+overide.ssh.private_key_path      =  "PATH TO YOUR PRIVATE KEY" 
+overide.vm.box                    =  'dummy'
+</code></pre>
+
+<p>end</p>
+
+<p>{% endcodeblock %}</p>
 
 <p>这样配置以后你可以用<em>vagrant up &mdash;provider=aws</em>来远程启动AWS云里的虚拟机。当然之前你需要安装AWS的<a href="https://github.com/mitchellh/vagrant-aws">Provider</a>和配置这个Provider需要的dummy Box。
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant plugin install vagrant-aws&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;vagrant box add dummy &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box&quot;</span>&gt;https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box&lt;/a&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+vagrant plugin install vagrant-aws</p>
+
+<p>vagrant box add dummy <a href="https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box">https://github.com/mitchellh/vagrant-aws/raw/master/dummy.box</a>
+{% endcodeblock %}
 接下来的教程我们还是以VirtualBox这个Provider为例来讲解。</p>
 
 <h2>Shared folders</h2>
 
 <p>我们接下来可以打开注释里的<em>config.vm.synced_folder</em>并修改映射到已经存在的一个文件夹。以我的机器为例：
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">.</span><span class="n">.</span><span class="o">/</span><span class="n">training</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">vagrant_data</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:ruby%}
+config.vm.synced_folder &ldquo;../training&rdquo;, &ldquo;/vagrant_data&rdquo;
+{% endcodeblock %}
 这样的话可以把本机Host里的一个文件夹映射到Guest虚拟机里。修改这个设置之后需要重启虚拟机来生效，命令是
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">vagrant</span> <span class="n">reload</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:ruby%}
+vagrant reload
+{% endcodeblock %}
 这样启动完之后登陆后你可以看到映射的文件夹:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant ssh&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;vagrant@precise32:~<span class="nv">$ </span>ll /vagrant_data/
-</span><span class='line'>total 16
-</span><span class='line'>drwxr-xr-x  1 vagrant vagrant  238 Jul  4 10:40 ./
-</span><span class='line'>drwxr-xr-x 24 root    root    4096 Nov 18 02:25 ../
-</span><span class='line'>drwxr-xr-x  1 vagrant vagrant  170 Jul  4 10:39 cookbooks/
-</span><span class='line'>drwxr-xr-x  1 vagrant vagrant  272 Jan  8  2016 Docker/
-</span><span class='line'>-rw-r&amp;mdash;r&amp;mdash;  1 vagrant vagrant 8196 Jul  4 10:40 .DS_Store
-</span><span class='line'>drwxr-xr-x  1 vagrant vagrant  102 Jul  4 10:39 intro/
-</span><span class='line'>drwxr-xr-x  1 vagrant vagrant  102 Apr  5  2016 .vagrant/
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:bash%}
+vagrant ssh</p>
+
+<p>vagrant@precise32:~$ ll /vagrant_data/
+total 16
+drwxr-xr-x  1 vagrant vagrant  238 Jul  4 10:40 ./
+drwxr-xr-x 24 root    root    4096 Nov 18 02:25 ../
+drwxr-xr-x  1 vagrant vagrant  170 Jul  4 10:39 cookbooks/
+drwxr-xr-x  1 vagrant vagrant  272 Jan  8  2016 Docker/
+-rw-r&mdash;r&mdash;  1 vagrant vagrant 8196 Jul  4 10:40 .DS_Store
+drwxr-xr-x  1 vagrant vagrant  102 Jul  4 10:39 intro/
+drwxr-xr-x  1 vagrant vagrant  102 Apr  5  2016 .vagrant/
+{% endcodeblock %}</p>
 
 <h2>Network</h2>
 
 <p>默认的虚拟机的网络是NAT形式的，我们可以从Vagrant启动的log里看出来：
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">==</span>&gt; default: Preparing network interfaces based on configuration&amp;hellip;&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;default: Adapter 1: nat
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;<span class="o">==</span>&gt; default: Forwarding ports&amp;hellip;&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;default: <span class="nv">22</span> <span class="o">=</span>&amp;gt; 2202 <span class="o">(</span>adapter 1<span class="o">)</span>
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+==> default: Preparing network interfaces based on configuration&hellip;</p>
+
+<pre><code>default: Adapter 1: nat
+</code></pre>
+
+<p>==> default: Forwarding ports&hellip;</p>
+
+<pre><code>default: 22 =&gt; 2202 (adapter 1)
+</code></pre>
+
+<p>{% endcodeblock %}
 我们可以看到默认做了一个端口映射，所以我们可以通过访问本机端口2202来访问虚拟机的22(ssh)端口:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>ssh &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;&amp;#x6d;&amp;#97;&amp;#x69;&amp;#108;&amp;#116;&amp;#111;&amp;#x3a;&amp;#x76;&amp;#97;&amp;#x67;&amp;#114;&amp;#97;&amp;#110;&amp;#116;&amp;#x40;&amp;#x31;&amp;#50;&amp;#55;&amp;#x2e;&amp;#x30;&amp;#x2e;&amp;#48;&amp;#x2e;&amp;#x31;&quot;</span>&gt;&amp;#118;&amp;#x61;&amp;#x67;&amp;#x72;&amp;#97;&amp;#110;&amp;#116;&amp;#64;&amp;#49;&amp;#x32;&amp;#55;&amp;#x2e;&amp;#x30;&amp;#x2e;&amp;#48;&amp;#x2e;&amp;#49;&lt;/a&gt; -p 2202
-</span><span class='line'>The authenticity of host &amp;lsquo;<span class="o">[</span>127.0.0.1<span class="o">]</span>:2202 <span class="o">([</span>127.0.0.1<span class="o">]</span>:2202<span class="o">)</span>&amp;rsquo; can&amp;rsquo;t be established.
-</span><span class='line'>ECDSA key fingerprint is SHA256:q7StLmS/+YYwF42lL4HQJdMQGcAPpkKgzVlxORTisGE.
-</span><span class='line'>Are you sure you want to <span class="k">continue </span>connecting <span class="o">(</span>yes/no<span class="o">)</span>? yes&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;&lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;&amp;#109;&amp;#x61;&amp;#105;&amp;#108;&amp;#x74;&amp;#x6f;&amp;#58;&amp;#x76;&amp;#97;&amp;#x67;&amp;#x72;&amp;#97;&amp;#110;&amp;#116;&amp;#64;&amp;#49;&amp;#x32;&amp;#55;&amp;#46;&amp;#48;&amp;#46;&amp;#48;&amp;#46;&amp;#x31;&quot;</span>&gt;&amp;#x76;&amp;#x61;&amp;#103;&amp;#114;&amp;#x61;&amp;#x6e;&amp;#x74;&amp;#x40;&amp;#49;&amp;#x32;&amp;#x37;&amp;#x2e;&amp;#x30;&amp;#46;&amp;#x30;&amp;#x2e;&amp;#x31;&lt;/a&gt;&amp;rsquo;s password:&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;Last login: Fri Nov 18 02:26:09 2016 from 10.0.2.2
-</span><span class='line'>vagrant@precise32:~<span class="err">$</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+ssh <a href="&#x6d;&#x61;&#105;&#108;&#x74;&#111;&#58;&#x76;&#97;&#x67;&#x72;&#97;&#x6e;&#116;&#64;&#x31;&#x32;&#x37;&#46;&#x30;&#x2e;&#48;&#x2e;&#49;">&#x76;&#x61;&#x67;&#x72;&#x61;&#110;&#116;&#x40;&#x31;&#50;&#x37;&#x2e;&#48;&#x2e;&#48;&#46;&#49;</a> -p 2202
+The authenticity of host &lsquo;[127.0.0.1]:2202 ([127.0.0.1]:2202)&rsquo; can&rsquo;t be established.
+ECDSA key fingerprint is SHA256:q7StLmS/+YYwF42lL4HQJdMQGcAPpkKgzVlxORTisGE.
+Are you sure you want to continue connecting (yes/no)? yes</p>
+
+<p><a href="&#x6d;&#97;&#105;&#x6c;&#116;&#x6f;&#x3a;&#x76;&#97;&#103;&#114;&#97;&#x6e;&#116;&#64;&#49;&#50;&#x37;&#46;&#48;&#x2e;&#x30;&#x2e;&#x31;">&#118;&#97;&#x67;&#114;&#x61;&#x6e;&#116;&#64;&#x31;&#50;&#55;&#x2e;&#48;&#x2e;&#x30;&#46;&#x31;</a>&rsquo;s password:</p>
+
+<p>Last login: Fri Nov 18 02:26:09 2016 from 10.0.2.2
+vagrant@precise32:~$
+{% endcodeblock %}
 这个就是vagrant ssh的实现原理，默认的用户名是<em>vagrant</em>密码也是<em>vagrant</em>。这样的网络结构做一些简单的部署测试可以的，比方说我们可以定义本机的8080端口映射到虚拟机的80端口：
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">forwarded_port</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">guest</span><span class="p">:</span> <span class="mi">80</span><span class="p">,</span> <span class="ss">host</span><span class="p">:</span> <span class="mi">8080</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:ruby%}
+config.vm.network &ldquo;forwarded_port&rdquo;, guest: 80, host: 8080
+{% endcodeblock %}
 修改网络拓扑结构和配置之后也有重启虚拟机。从启动log我们可以看到端口成功映射了
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">==</span>&gt; default: Forwarding ports&amp;hellip;&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;pre&gt;&lt;code&gt;default: <span class="nv">80</span> <span class="o">=</span>&amp;gt; 8080 <span class="o">(</span>adapter 1<span class="o">)</span>
-</span><span class='line'>default: <span class="nv">22</span> <span class="o">=</span>&amp;gt; 2202 <span class="o">(</span>adapter 1<span class="o">)</span>
-</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;<span class="o">==</span>&gt; default: Running &amp;lsquo;pre-boot&amp;rsquo; VM customizations&amp;hellip;
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+==> default: Forwarding ports&hellip;</p>
+
+<pre><code>default: 80 =&gt; 8080 (adapter 1)
+default: 22 =&gt; 2202 (adapter 1)
+</code></pre>
+
+<p>==> default: Running &lsquo;pre-boot&rsquo; VM customizations&hellip;
+{% endcodeblock %}
 还有一种常用的网络结构是<em>private_network</em>，这种网络结构会创建一个只有主机能和虚拟机通信的私网，这种是通过指定虚拟机内网IP的形式来配置:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">private_network</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">ip</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">192</span><span class="o">.</span><span class="mi">168</span><span class="o">.</span><span class="mi">33</span><span class="o">.</span><span class="mi">10</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:ruby%}
+config.vm.network &ldquo;private_network&rdquo;, ip: &ldquo;192.168.33.10&rdquo;
+{% endcodeblock %}
 这样的配置启动后，Host本机会拥有IP <em>192.168.33.1</em>, 这样本机和虚拟机就是一个网段，通信就没有障碍了。最后一种形式是<em>public_network</em>,这种就是为虚拟机建一个Bridge的网络，相当于虚拟机变成你现有网络里另一台机器。但是这种是受限于网络要求的，像我们公司就是不允许这种网络结构的，你的虚拟机得不到IP。<br>
 当然这里网络配置都是针对本地的虚拟机，像是AWS，Openstack这种云里的虚拟机所在自己的Provider配置里来配置的。一般网络结构受限于云和Provider插件支持的类型。</p>
 
 <h2>Provisioner</h2>
 
 <p>现在虚拟机已经启动好了，我们需要配置,部署一些软件上去，这就用到了Provisioner。Vagrantfile也支持多个Provisioner，它们会按配置顺序挨个执行。例如我们可以打开注释里的：
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">shell</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="ss">inline</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">&amp;</span><span class="n">lt</span><span class="p">;</span><span class="o">-</span><span class="no">SHELL</span>
-</span><span class='line'>   <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
-</span><span class='line'>   <span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">apache2</span>
-</span><span class='line'> <span class="no">SHELL</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:ruby%}
+ config.vm.provision &ldquo;shell&rdquo;, inline: &lt;&lt;-SHELL
+   sudo apt-get update
+   sudo apt-get install -y apache2
+ SHELL
+{% endcodeblock %}
 修改完之后我们又要用到一个新命令:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant provision
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+vagrant provision
+{% endcodeblock %}
 这个命令会执行所有定义的provision命令block。之后我们会在控制台看到很长的一段输出，成功执行之后我们就装好了Apache, 我们可以打开浏览器试一试。因为我们已经配置好了端口映射，所以访问本机的8080端口应该能到Apache的欢迎页面。</p>
 
 <blockquote><p>It works!</p>
@@ -466,141 +657,74 @@ Box是你的虚拟机启动时用的base image,所以你就不必从头去设置
 
 
 <p>这篇教程用到的完整Vagrantfile（去掉了一些注释）如下:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">v</span><span class="c1"># &amp;ndash;&lt;em&gt;&amp;ndash; mode: ruby &amp;ndash;&lt;/em&gt;&amp;ndash;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">h1</span><span class="o">&gt;</span><span class="ss">vi</span><span class="p">:</span> <span class="n">set</span> <span class="n">ft</span><span class="o">=</span><span class="n">ruby</span> <span class="p">:</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;Vagrant.configure(2) do |config|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Every Vagrant development environment requires a box. You can search for</span>
-</span><span class='line'>  <span class="c1"># boxes at &lt;a href=&quot;https://atlas.hashicorp.com/search.&quot;&gt;https://atlas.hashicorp.com/search.&lt;/a&gt;</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">hashicorp</span><span class="o">/</span><span class="n">precise32</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  # Create a forwarded port mapping which allows access to a specific port</span>
-</span><span class='line'><span class="sr">  # within the machine from a port on the host machine. In the example below,</span>
-</span><span class='line'><span class="sr">  # accessing &amp;ldquo;localhost:8080&amp;rdquo; will access port 80 on the guest machine.</span>
-</span><span class='line'><span class="sr">  config.vm.network &amp;ldquo;forwarded_port&amp;rdquo;, guest: 80, host: 8080&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="c1"># Share an additional folder to the guest VM. The first argument is</span>
-</span><span class='line'>  <span class="c1"># the path on the host to the actual folder. The second argument is</span>
-</span><span class='line'>  <span class="c1"># the path on the guest to mount the folder. And the optional third</span>
-</span><span class='line'>  <span class="c1"># argument is a set of non-required options.</span>
-</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">synced_folder</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">.</span><span class="n">.</span><span class="o">/</span><span class="n">training</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="o">/</span><span class="n">vagrant_data</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  # Provider-specific configuration so you can fine-tune various</span>
-</span><span class='line'><span class="sr">  # backing providers for Vagrant. These expose provider-specific options.</span>
-</span><span class='line'><span class="sr">  # Example for VirtualBox:</span>
-</span><span class='line'><span class="sr">  config.vm.provider &amp;ldquo;virtualbox&amp;rdquo; do |vb|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1"># Display the VirtualBox GUI when booting the machine</span>
-</span><span class='line'><span class="n">vb</span><span class="o">.</span><span class="n">gui</span> <span class="o">=</span> <span class="kp">true</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Customize the amount of memory on the VM:</span>
-</span><span class='line'><span class="n">vb</span><span class="o">.</span><span class="n">memory</span> <span class="o">=</span> <span class="s2">&quot;1024&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Configure the virtual machine name displayed in VirtualBox</span>
-</span><span class='line'><span class="n">vb</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;vagrant_leanring&quot;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  config.vm.provider :aws do |aws,overide|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>  <span class="n">aws</span><span class="o">.</span><span class="n">security_groups</span>           <span class="o">=</span>  <span class="sx">%w(everything_open)</span>
-</span><span class='line'>  <span class="n">aws</span><span class="o">.</span><span class="n">access_key_id</span>             <span class="o">=</span>  <span class="s2">&quot;YOUR KEY&quot;</span>
-</span><span class='line'>  <span class="n">aws</span><span class="o">.</span><span class="n">secret_access_key</span>         <span class="o">=</span>  <span class="s2">&quot;YOUR SECRET KEY&quot;</span>
-</span><span class='line'>  <span class="n">aws</span><span class="o">.</span><span class="n">ami</span>                       <span class="o">=</span>  <span class="s2">&quot;ami-xxx&quot;</span>
-</span><span class='line'>  <span class="n">aws</span><span class="o">.</span><span class="n">instance_type</span>             <span class="o">=</span>  <span class="s2">&quot;m1.medium&quot;</span>
-</span><span class='line'>  <span class="n">aws</span><span class="o">.</span><span class="n">keypair_name</span>              <span class="o">=</span>  <span class="s2">&quot;KEYPAIR NAME&quot;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">overide</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">username</span>              <span class="o">=</span>  <span class="s2">&quot;root&quot;</span>
-</span><span class='line'>  <span class="n">overide</span><span class="o">.</span><span class="n">ssh</span><span class="o">.</span><span class="n">private_key_path</span>      <span class="o">=</span>  <span class="s2">&quot;PATH TO YOUR PRIVATE KEY&quot;</span>
-</span><span class='line'>  <span class="n">overide</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span>                    <span class="o">=</span>  <span class="s1">&#39;dummy&#39;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;  # Enable provisioning with a shell script. Additional provisioners such as</span>
-</span><span class='line'><span class="sr">  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the</span>
-</span><span class='line'><span class="sr">  # documentation for more information about their specific syntax and use.</span>
-</span><span class='line'><span class="sr">  config.vm.provision &amp;ldquo;shell&amp;rdquo;, inline: &amp;lt;&amp;lt;-SHELL&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
-</span><span class='line'><span class="n">sudo</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">apache2</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="no">SHELL</span>
-</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">&lt;p&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:ruby%}
+v# &ndash;<em>&ndash; mode: ruby &ndash;</em>&ndash;</p>
+
+<h1>vi: set ft=ruby :</h1>
+
+<p>Vagrant.configure(2) do |config|</p>
+
+<p>  # Every Vagrant development environment requires a box. You can search for
+  # boxes at <a href="https://atlas.hashicorp.com/search.">https://atlas.hashicorp.com/search.</a>
+  config.vm.box = &ldquo;hashicorp/precise32&rdquo;</p>
+
+<p>  # Create a forwarded port mapping which allows access to a specific port
+  # within the machine from a port on the host machine. In the example below,
+  # accessing &ldquo;localhost:8080&rdquo; will access port 80 on the guest machine.
+  config.vm.network &ldquo;forwarded_port&rdquo;, guest: 80, host: 8080</p>
+
+<p>  # Share an additional folder to the guest VM. The first argument is
+  # the path on the host to the actual folder. The second argument is
+  # the path on the guest to mount the folder. And the optional third
+  # argument is a set of non-required options.
+  config.vm.synced_folder &ldquo;../training&rdquo;, &ldquo;/vagrant_data&rdquo;</p>
+
+<p>  # Provider-specific configuration so you can fine-tune various
+  # backing providers for Vagrant. These expose provider-specific options.
+  # Example for VirtualBox:
+  config.vm.provider &ldquo;virtualbox&rdquo; do |vb|</p>
+
+<pre><code># Display the VirtualBox GUI when booting the machine
+vb.gui = true
+
+# Customize the amount of memory on the VM:
+vb.memory = "1024"
+
+# Configure the virtual machine name displayed in VirtualBox
+vb.name = "vagrant_leanring"
+</code></pre>
+
+<p>  end</p>
+
+<p>  config.vm.provider :aws do |aws,overide|</p>
+
+<pre><code>  aws.security_groups           =  %w(everything_open)
+  aws.access_key_id             =  "YOUR KEY"
+  aws.secret_access_key         =  "YOUR SECRET KEY"
+  aws.ami                       =  "ami-xxx"
+  aws.instance_type             =  "m1.medium"
+  aws.keypair_name              =  "KEYPAIR NAME"
+
+  overide.ssh.username              =  "root"
+  overide.ssh.private_key_path      =  "PATH TO YOUR PRIVATE KEY" 
+  overide.vm.box                    =  'dummy'
+</code></pre>
+
+<p>  end</p>
+
+<p>  # Enable provisioning with a shell script. Additional provisioners such as
+  # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
+  # documentation for more information about their specific syntax and use.
+  config.vm.provision &ldquo;shell&rdquo;, inline: &lt;&lt;-SHELL</p>
+
+<pre><code>sudo apt-get update
+sudo apt-get install -y apache2
+</code></pre>
+
+<p>  SHELL
+end</p>
+
+<p>{% endcodeblock %}</p>
 
 <br><br>
 

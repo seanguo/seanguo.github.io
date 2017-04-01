@@ -1,0 +1,606 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Vagrant+Chef - Sean's Blog</title>
+  <meta name="author" content="Sean Guo">
+
+  
+  <meta name="description" content="引言 前面我介绍了Chef的环境搭建和简单的cookbook的创建执行，也介绍了如果用Vagrant来快速搭建一台虚拟机。但是所有的东西都停留在hello world的阶段，这篇文章就是结合这两个生产力工具来搭建一组可以实际使用用来做rails开发的server。 Chef &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Sean's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="./javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="http://fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="http://fonts.googleapis.com/css?family=PT+Sans:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Sean's Blog</a></h1>
+  
+    <h2>Basically technique.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="http://google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="q" value="site:www.seanguo.com" />
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Vagrant+Chef</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-03-12T19:32:51+08:00" pubdate data-updated="true">Mar 12<span>th</span>, 2017</time>
+        
+           | <a href="#disqus_thread"
+             data-disqus-identifier="http://www.seanguo.com">Comments</a>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>引言</h2>
+
+<p>前面我介绍了Chef的环境搭建和简单的cookbook的创建执行，也介绍了如果用Vagrant来快速搭建一台虚拟机。但是所有的东西都停留在hello world的阶段，这篇文章就是结合这两个生产力工具来搭建一组<del>可以实际使用</del>用来做rails开发的server。</p>
+
+<h2>Chef Provisioning</h2>
+
+<p>我们知道Vagrant包含多种不同类型的provisioner，而Chef就是其中内置的一种，所以我们是可以直接使用的。这里我们用到的是chef_solo, Chef Solo是Chef Client的单机版，运行不依赖于Chef Server。</p>
+
+<p>第一步我们要下载我们需要安装的组件的cookbook，这里我们会用到第三方的cookbook，因为在<a href="https://supermarket.chef.io/cookbooks/">社区</a>里已经有很多成熟的cookbook了。但是手工下载的方式不太方便，这里我们用到cookbook的依赖管理的工具: <a href="https://docs.chef.io/berkshelf.html">Berkshelf</a>。它和Ruby的gem管理文件Gemfile语法类似，它的配置文件是Berksfile。我们在当前文件夹（我这里是<strong>vagrant_test</strong>）创建一个空的Berksfile。chef-dk里面已经包含Berkshelf的命令行工具了，对应的命令是<strong>berks</strong>, 但是Vagrant想要用Berkshelf的时候我们还要装个插件来实现，可以用下面的命令来安装最新Berkshelf的插件。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant plugin install vagrant-berkshelf
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后编辑Berksfile加上如下两行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="s1">&#39;https://supermarket.chef.io&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">cookbook</span> <span class="s1">&#39;rails&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 0.9.2&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>source语句指定了去supermarket.chef.io搜索下载cookbook, 第二行声明我们依赖于一个叫rails的cookbook，version为0.9.2，关于version的语法可以<a href="https://docs.chef.io/config_rb_metadata.html#cookbook-version-constraints">戳这里</a>。</p>
+
+<p>我们接着创建一个新的Vagrantfile, 这里我们打算创建两个虚拟机，一个作为rails的主server，另一个用来安装mysql。我们先看第一台虚拟机的配置：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># -*- mode: ruby -*-</span>
+</span><span class='line'><span class="c1"># vi: set ft=ruby :</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#base box for all machines</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;bento/centos-6.7&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#define a VM named rails</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="s2">&quot;rails&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">rails</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">v</span><span class="o">.</span><span class="n">name</span>           <span class="o">=</span> <span class="s2">&quot;rails&quot;</span>
+</span><span class='line'>      <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:private_network</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="s2">&quot;192.168.50.20&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#configure chef provisoning per VM</span>
+</span><span class='line'>    <span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;yum -y groupinstall &#39;Development Tools&#39;&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;chef_solo&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">chef</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">node_name</span> <span class="o">=</span> <span class="s2">&quot;rails&quot;</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="ss">:debug</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s2">&quot;run_list&quot;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;rails&quot;</span><span class="o">]</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后我们启动这台rails虚拟机，多虚拟机配置的启动需要指定虚拟机的名字，要不就是默认全部启动。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant up rails
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这块儿由于是第一次启动这个虚拟机，它会首先下载需要的cookbook，然后映射到虚拟机里，启动虚拟机之后会首先下载安装Chef，这个过程很耗时间。</p>
+
+<p>这里定义了两个provisioning，一个是用sh安装Rails依赖的开发工具包。另一个是利用rails这个cookbook来配置Rails的环境。
+我这块遇到了在墙内会超时的问题。科学上网后解决了但是还是很耗时间，主要是下载Chef的安装包费时间。我们可以在其装好了chef和dev tools之后把这个box存起来作为以后的base box。命令如下:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant package --base rails
+</span><span class='line'>vagrant box add mybase package.box
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装完box之后可以用下面的命令查看是否安装成功:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant box list
+</span><span class='line'>bento/centos-6.7 <span class="o">(</span>virtualbox, 2.2.7<span class="o">)</span>
+</span><span class='line'>mybase           <span class="o">(</span>virtualbox, 0<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以后就可以用mybase作为box的name来复用已经下载安装好Chef和dev tools的box。</p>
+
+<p>安装成功后我们可以用如下命令登录进去:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant ssh rails
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后我们定义另外一个虚拟机用来安装mysql，这里我们取名为mysql:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="s2">&quot;mysql&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">mysql</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mysql</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">v</span><span class="o">.</span><span class="n">name</span>           <span class="o">=</span> <span class="s2">&quot;mysql&quot;</span>
+</span><span class='line'>      <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:private_network</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="s2">&quot;192.168.50.21&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mysql</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;chef_solo&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">chef</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">node_name</span> <span class="o">=</span> <span class="s2">&quot;mysql&quot;</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="ss">:debug</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s2">&quot;run_list&quot;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;vagrant_chef::mysql&quot;</span><span class="o">]</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'> <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>因为对这个cookbook的调用不能直接通过runlist，需要在recipe里调用它的resource来进行，我们需要把当前目录变成一个cookbook。一个cookbook的最小因素就是一个用来自描述的metadata.rb</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">name</span>             <span class="s2">&quot;vagrant_chef&quot;</span>
+</span><span class='line'><span class="n">maintainer</span>       <span class="s2">&quot;YOUR_NAME&quot;</span>
+</span><span class='line'><span class="n">maintainer_email</span> <span class="s2">&quot;YOUR_EMAIL&quot;</span>
+</span><span class='line'><span class="n">license</span>          <span class="s2">&quot;All rights reserved&quot;</span>
+</span><span class='line'><span class="n">description</span>      <span class="s2">&quot;Installs/Configures mysql server&quot;</span>
+</span><span class='line'><span class="n">version</span>          <span class="s2">&quot;0.0.1&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">depends</span> <span class="s2">&quot;mysql&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这里我们还要加上对mysql的依赖，只有这样才能保证使用mysql的resource之前对mysql的依赖都全部被加载好。然后我们需要在Berksfile里指定mysql的cookbook版本，这样Berkshelf插件才会把这个新依赖的cookbook抓下来:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="s1">&#39;https://supermarket.chef.io&#39;</span>
+</span><span class='line'><span class="n">metadata</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">cookbook</span> <span class="s1">&#39;rails&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 0.9.2&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">cookbook</span> <span class="s1">&#39;mysql&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 8.2.0&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我们还加上了一行metadata，表示我们解析当前目录的metadata.rb, 把当前这个cookbook也加载进来。然后我们创建一个receipes文件夹，创建一个mysql.rb:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">mysql_service</span> <span class="s1">&#39;mysql&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">port</span> <span class="s1">&#39;3306&#39;</span>
+</span><span class='line'>  <span class="n">version</span> <span class="s1">&#39;5.5&#39;</span>
+</span><span class='line'>  <span class="n">initial_root_password</span> <span class="s1">&#39;change me&#39;</span>
+</span><span class='line'>  <span class="n">action</span> <span class="o">[</span><span class="ss">:create</span><span class="p">,</span> <span class="ss">:start</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个Recipe用来安装设置mysql， 可以看到上面我们中对虚拟机的provisioning的配置里可以通过把<strong>vagrant_chef::mysql</strong>加到runlist来实现对这个Recipe的调用。
+所有都做好我们可以调用</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant up mysql
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样mysql这个虚拟机也会被创建设置好。</p>
+
+<p>本来就想写个vagrant+chef的教程，结果大部分时间花在调试这两个别人写的cookbook。终于还是放弃了，所以这个教程的Chef安装部分是跑不起来的，仅供参考。但是其中你也能学到多个虚拟机的配置，组网，如何在Vagrant使用Chef, Berkshelf这些东西。</p>
+
+<p>完整的Vagrantfile如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># -*- mode: ruby -*-</span>
+</span><span class='line'><span class="c1"># vi: set ft=ruby :</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="s2">&quot;2&quot;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#base box for all machines</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">box</span> <span class="o">=</span> <span class="s2">&quot;bento/centos-6.7&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#define a VM named rails</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="s2">&quot;rails&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">rails</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">v</span><span class="o">.</span><span class="n">name</span>           <span class="o">=</span> <span class="s2">&quot;rails&quot;</span>
+</span><span class='line'>      <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:private_network</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="s2">&quot;192.168.50.20&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">#configure chef provisoning per VM</span>
+</span><span class='line'>    <span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;yum -y groupinstall &#39;Development Tools&#39;&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;chef_solo&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">chef</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">node_name</span> <span class="o">=</span> <span class="s2">&quot;rails&quot;</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="ss">:debug</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s2">&quot;run_list&quot;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;rails&quot;</span><span class="o">]</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="s2">&quot;mysql&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">mysql</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mysql</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">v</span><span class="o">.</span><span class="n">name</span>           <span class="o">=</span> <span class="s2">&quot;mysql&quot;</span>
+</span><span class='line'>      <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:private_network</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="s2">&quot;192.168.50.21&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mysql</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;chef_solo&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">chef</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">node_name</span> <span class="o">=</span> <span class="s2">&quot;mysql&quot;</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="ss">:debug</span>
+</span><span class='line'>      <span class="n">chef</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s2">&quot;run_list&quot;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;vagrant_chef::mysql&quot;</span><span class="o">]</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Sean Guo</span></span>
+
+      
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2017-03-12T19:32:51+08:00" pubdate data-updated="true">Mar 12<span>th</span>, 2017</time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/chef/'>chef</a>, <a class='category' href='/blog/categories/productivity/'>productivity</a>, <a class='category' href='/blog/categories/tool/'>tool</a>, <a class='category' href='/blog/categories/vagrant/'>vagrant</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef/" data-via="" data-counturl="http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef/" >Tweet</a>
+  
+  
+  <div class="g-plusone" data-size="medium"></div>
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2017/02/17/chefjie-shao/" title="Previous Post: Chef 介绍 Part1 Setup">&laquo; Chef 介绍 Part1 Setup</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2017/03/12/vagrant-plus-chef/">Vagrant+Chef</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/02/17/chefjie-shao/">Chef 介绍 Part1 Setup</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh/">如何构建黑苹果(Hackintosh)</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2016/11/16/vagrant-ru-men/">Vagrant 入门</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2013/11/27/itunes-backup-location/">Itunes的备份之后的文件在哪儿</a>
+      </li>
+    
+  </ul>
+</section>
+
+<section>
+  <h1>GitHub Repos</h1>
+  <ul id="gh_repos">
+    <li class="loading">Status updating...</li>
+  </ul>
+  
+  <a href="https://github.com/seanguo">@seanguo</a> on GitHub
+  
+  <script type="text/javascript">
+    $(document).ready(function(){
+        if (!window.jXHR){
+            var jxhr = document.createElement('script');
+            jxhr.type = 'text/javascript';
+            jxhr.src = '/javascripts/libs/jXHR.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(jxhr, s);
+        }
+
+        github.showRepos({
+            user: 'seanguo',
+            count: 0,
+            skip_forks: true,
+            target: '#gh_repos'
+        });
+    });
+  </script>
+  <script src="/javascripts/github.js" type="text/javascript"> </script>
+</section>
+
+
+
+
+<section id="tag-cloud" class="aside-module grid__item one-whole lap-one-half">
+  <h1 class="title delta">Tag Cloud</h1>
+    <span id="tag-cloud"></span> 
+</section>
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2017 - Sean Guo -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'seanguo';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef/';
+        var disqus_url = 'http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function() {
+      var script = document.createElement('script'); script.type = 'text/javascript'; script.async = true;
+      script.src = 'https://apis.google.com/js/plusone.js';
+      var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(script, s);
+    })();
+  </script>
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

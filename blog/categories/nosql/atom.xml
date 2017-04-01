@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Nosql | Sean's Blog]]></title>
   <link href="http://www.seanguo.com/blog/categories/nosql/atom.xml" rel="self"/>
   <link href="http://www.seanguo.com/"/>
-  <updated>2017-03-04T09:40:22+08:00</updated>
+  <updated>2017-04-01T17:50:50+08:00</updated>
   <id>http://www.seanguo.com/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -344,12 +344,11 @@ Cassandra and HBase are both highly scalable column-oriented database. Cassandra
 <p><strong>Operations</strong>:</p>
 
 <p>To enable high performance and availability we allow only very simple key-value data access. Both keys and values can be complex compound objects including lists or maps, but none-the-less the only supported queries are effectively the following:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>value = store.get(key)
-</span><span class='line'>store.put(key, value)
-</span><span class='line'>store.delete(key)</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock %}
+value = store.get(key)
+store.put(key, value)
+store.delete(key)
+{% endcodeblock %}</p>
 
 <p>Voldemort supports hashtable semantics, so a single value can be modified at a time and retrieval is by primary key. This makes distribution across machines particularly easy since everything can be split by the primary key.</p>
 
@@ -452,140 +451,81 @@ So finally we choose Cassadra. It is a mixed type database, which has Dynamo’s
 <h4>Programming</h4>
 
 <p>The recommended way to communicate with Cassandra in your application is to use a higher-level client. These provide programming language specific APIs for talking to Cassandra in a variety of languages. The details will vary depending on programming language and client, but in general using a higher-level client will mean that you have to write less code and get several features for free that you would otherwise have to write yourself.  Using Hector for example:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">package</span> <span class="n">com</span><span class="o">.</span><span class="na">riptano</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">hector</span><span class="o">.</span><span class="na">example</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span><span class="kn">import</span> <span class="nn">me.prettyprint.cassandra.serializers.StringSerializer</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.Cluster</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.Keyspace</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.beans.HColumn</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.exceptions.HectorException</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.factory.HFactory</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.mutation.Mutator</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.query.ColumnQuery</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">me.prettyprint.hector.api.query.QueryResult</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;/&lt;</span><span class="n">em</span><span class="o">&gt;*</span>
-</span><span class='line'> <span class="o">*</span> <span class="n">Inserts</span> <span class="n">the</span> <span class="n">value</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">John</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="n">under</span> <span class="n">the</span> <span class="n">Column</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">first</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="k">for</span> <span class="n">the</span>
-</span><span class='line'> <span class="o">*</span> <span class="n">key</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">jsmith</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="n">in</span> <span class="n">the</span> <span class="n">Standard1</span> <span class="n">ColumnFamily</span>
-</span><span class='line'> <span class="o">*</span>
-</span><span class='line'> <span class="o">*</span> <span class="n">To</span> <span class="n">run</span> <span class="k">this</span> <span class="n">example</span> <span class="n">from</span> <span class="nl">maven:</span>
-</span><span class='line'> <span class="o">*</span> <span class="n">mvn</span> <span class="o">-</span><span class="n">e</span> <span class="nl">exec:</span><span class="n">java</span> <span class="o">-</span><span class="n">Dexec</span><span class="o">.</span><span class="na">mainClass</span><span class="o">=&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">com</span><span class="o">.</span><span class="na">riptano</span><span class="o">.</span><span class="na">cassandra</span><span class="o">.</span><span class="na">hector</span><span class="o">.</span><span class="na">example</span><span class="o">.</span><span class="na">InsertSingleColumn</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span>
-</span><span class='line'> <span class="o">*</span>
-</span><span class='line'> <span class="o">*</span> <span class="nd">@author</span> <span class="n">zznate</span>
-</span><span class='line'> <span class="o">*</span>
-</span><span class='line'> <span class="o">&lt;/</span><span class="n">em</span><span class="o">&gt;/</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">InsertSingleColumn</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="kd">private</span> <span class="kd">static</span> <span class="n">StringSerializer</span> <span class="n">stringSerializer</span> <span class="o">=</span> <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="kd">throws</span> <span class="n">Exception</span> <span class="o">{</span>
-</span><span class='line'>    <span class="n">Cluster</span> <span class="n">cluster</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">getOrCreateCluster</span><span class="o">(</span><span class="s">&quot;TestCluster&quot;</span><span class="o">,</span> <span class="s">&quot;localhost:9160&quot;</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">Keyspace</span> <span class="n">keyspaceOperator</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createKeyspace</span><span class="o">(</span><span class="s">&quot;Keyspace1&quot;</span><span class="o">,</span> <span class="n">cluster</span><span class="o">);</span>
-</span><span class='line'>    <span class="k">try</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">Mutator</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">String</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">mutator</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createMutator</span><span class="o">(</span><span class="n">keyspaceOperator</span><span class="o">,</span> <span class="n">StringSerializer</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
-</span><span class='line'>        <span class="n">mutator</span><span class="o">.</span><span class="na">insert</span><span class="o">(</span><span class="s">&quot;jsmith&quot;</span><span class="o">,</span> <span class="s">&quot;Standard1&quot;</span><span class="o">,</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createStringColumn</span><span class="o">(</span><span class="s">&quot;first&quot;</span><span class="o">,</span> <span class="s">&quot;John&quot;</span><span class="o">));</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="n">ColumnQuery</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">columnQuery</span> <span class="o">=</span> <span class="n">HFactory</span><span class="o">.</span><span class="na">createStringColumnQuery</span><span class="o">(</span><span class="n">keyspaceOperator</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">columnQuery</span><span class="o">.</span><span class="na">setColumnFamily</span><span class="o">(</span><span class="s">&quot;Standard1&quot;</span><span class="o">).</span><span class="na">setKey</span><span class="o">(</span><span class="s">&quot;jsmith&quot;</span><span class="o">).</span><span class="na">setName</span><span class="o">(</span><span class="s">&quot;first&quot;</span><span class="o">);</span>
-</span><span class='line'>        <span class="n">QueryResult</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">HColumn</span><span class="o">&amp;</span><span class="n">lt</span><span class="o">;</span><span class="n">String</span><span class="o">,</span> <span class="n">String</span><span class="o">&amp;</span><span class="n">gt</span><span class="o">;&amp;</span><span class="n">gt</span><span class="o">;</span> <span class="n">result</span> <span class="o">=</span> <span class="n">columnQuery</span><span class="o">.</span><span class="na">execute</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Read HColumn from cassandra: &quot;</span> <span class="o">+</span> <span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">());</span>
-</span><span class='line'>        <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Verify on CLI with:  get Keyspace1.Standard1[&#39;jsmith&#39;] &quot;</span><span class="o">);</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="o">}</span> <span class="k">catch</span> <span class="o">(</span><span class="n">HectorException</span> <span class="n">e</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>        <span class="n">e</span><span class="o">.</span><span class="na">printStackTrace</span><span class="o">();</span>
-</span><span class='line'>    <span class="o">}</span>
-</span><span class='line'>    <span class="n">cluster</span><span class="o">.</span><span class="na">getConnectionManager</span><span class="o">().</span><span class="na">shutdown</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:java%}
+package com.riptano.cassandra.hector.example;</p>
+
+<p>import me.prettyprint.cassandra.serializers.StringSerializer;
+import me.prettyprint.hector.api.Cluster;
+import me.prettyprint.hector.api.Keyspace;
+import me.prettyprint.hector.api.beans.HColumn;
+import me.prettyprint.hector.api.exceptions.HectorException;
+import me.prettyprint.hector.api.factory.HFactory;
+import me.prettyprint.hector.api.mutation.Mutator;
+import me.prettyprint.hector.api.query.ColumnQuery;
+import me.prettyprint.hector.api.query.QueryResult;</p>
+
+<p>/<em>*
+ * Inserts the value &ldquo;John&rdquo; under the Column &ldquo;first&rdquo; for the
+ * key &ldquo;jsmith&rdquo; in the Standard1 ColumnFamily
+ *
+ * To run this example from maven:
+ * mvn -e exec:java -Dexec.mainClass=&ldquo;com.riptano.cassandra.hector.example.InsertSingleColumn&rdquo;
+ *
+ * @author zznate
+ *
+ </em>/
+public class InsertSingleColumn {</p>
+
+<pre><code>private static StringSerializer stringSerializer = StringSerializer.get();
+
+public static void main(String[] args) throws Exception {
+    Cluster cluster = HFactory.getOrCreateCluster("TestCluster", "localhost:9160");
+
+    Keyspace keyspaceOperator = HFactory.createKeyspace("Keyspace1", cluster);
+    try {
+        Mutator&lt;String&gt; mutator = HFactory.createMutator(keyspaceOperator, StringSerializer.get());
+        mutator.insert("jsmith", "Standard1", HFactory.createStringColumn("first", "John"));
+
+        ColumnQuery&lt;String, String, String&gt; columnQuery = HFactory.createStringColumnQuery(keyspaceOperator);
+        columnQuery.setColumnFamily("Standard1").setKey("jsmith").setName("first");
+        QueryResult&lt;HColumn&lt;String, String&gt;&gt; result = columnQuery.execute();
+
+        System.out.println("Read HColumn from cassandra: " + result.get());            
+        System.out.println("Verify on CLI with:  get Keyspace1.Standard1['jsmith'] ");
+
+    } catch (HectorException e) {
+        e.printStackTrace();
+    }
+    cluster.getConnectionManager().shutdown();
+}
+</code></pre>
+
+<p>}
+{% endcodeblock %}</p>
 
 <h3>HBase</h3>
 
 <h4>Setup:</h4>
 
 <p>Download and unpack the latest stable release. Click on the folder named stable and then download the file that ends in .tar.gz to your local filesystem; e.g. hbase-0.91.0-SNAPSHOT.tar.gz. Decompress and untar your download and then change into the unpacked directory.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'> <span class="nv">$ </span>tar xfz hbase-0.91.0-SNAPSHOT.tar.gz
-</span><span class='line'> <span class="nv">$ </span><span class="nb">cd </span>hbase-0.91.0-SNAPSHOT
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+ $ tar xfz hbase-0.91.0-SNAPSHOT.tar.gz
+ $ cd hbase-0.91.0-SNAPSHOT
+{% endcodeblock %}
 At this point, you are ready to start HBase. But before starting it, you might want to edit conf/hbase-site.xml and set the directory you want HBase to write to, hbase.rootdir.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='xml'><span class='line'> <span class="ni">&amp;lt;</span>?xml version=<span class="ni">&amp;ldquo;</span>1.0<span class="ni">&amp;rdquo;</span>?&gt;
-</span><span class='line'> <span class="ni">&amp;lt;</span>?xml-stylesheet type=<span class="ni">&amp;ldquo;</span>text/xsl<span class="ni">&amp;rdquo;</span> href=<span class="ni">&amp;ldquo;</span>configuration.xsl<span class="ni">&amp;rdquo;</span>?&gt;
-</span><span class='line'><span class="nt">&lt;configuration&gt;</span>
-</span><span class='line'>   <span class="nt">&lt;property&gt;&lt;/p&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">&lt;pre&gt;&lt;code&gt;</span> <span class="ni">&amp;lt;</span>name<span class="ni">&amp;gt;</span>hbase.rootdir<span class="ni">&amp;lt;</span>/name<span class="ni">&amp;gt;</span>
-</span><span class='line'> <span class="ni">&amp;lt;</span>value<span class="ni">&amp;gt;</span>file:///DIRECTORY/hbase<span class="ni">&amp;lt;</span>/value<span class="ni">&amp;gt;</span>
-</span><span class='line'><span class="nt">&lt;/code&gt;&lt;/pre&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nt">&lt;p&gt;</span>   <span class="nt">&lt;/property&gt;</span>
-</span><span class='line'> <span class="nt">&lt;/configuration&gt;&lt;br/&gt;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:xml%}
+ &lt;?xml version=&ldquo;1.0&rdquo;?>
+ &lt;?xml-stylesheet type=&ldquo;text/xsl&rdquo; href=&ldquo;configuration.xsl&rdquo;?>
+<configuration>
+   <property></p>
+
+<pre><code> &lt;name&gt;hbase.rootdir&lt;/name&gt;
+ &lt;value&gt;file:///DIRECTORY/hbase&lt;/value&gt;
+</code></pre>
+
+<p>   </property>
+ </configuration><br/>
+{% endcodeblock %}</p>
 
 <p>Replace DIRECTORY in the above with a path to a directory where you want HBase to store its data. By default, hbase.rootdir is set to /tmp/hbase-${user.name} which means you&rsquo;ll lose all your data whenever your server reboots (Most operating systems clear /tmp on restart).
 $ ./bin/start-hbase.sh starting Master, logging to logs/hbase-user-master-example.org.out</p>
@@ -594,161 +534,85 @@ $ ./bin/start-hbase.sh starting Master, logging to logs/hbase-user-master-exampl
 
 <h4>Programming</h4>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">java.io.IOException</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.client.HTable</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.client.Scanner</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.io.BatchUpdate</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.io.Cell</span><span class="o">;</span>
-</span><span class='line'><span class="kn">import</span> <span class="nn">org.apache.hadoop.hbase.io.RowResult</span><span class="o">;</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">MyClient</span> <span class="o">{</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span> <span class="n">args</span><span class="o">[])</span> <span class="kd">throws</span> <span class="n">IOException</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="c1">// You need a configuration object to tell the client where to connect.</span>
-</span><span class='line'><span class="c1">// But don&#39;t worry, the defaults are pulled from the local config file.</span>
-</span><span class='line'><span class="n">HBaseConfiguration</span> <span class="n">config</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HBaseConfiguration</span><span class="o">();</span>
-</span><span class='line'><span class="c1">// This instantiates an HTable object that connects you to the &quot;myTable&quot;</span>
-</span><span class='line'><span class="c1">// table. </span>
-</span><span class='line'><span class="n">HTable</span> <span class="n">table</span> <span class="o">=</span> <span class="k">new</span> <span class="n">HTable</span><span class="o">(</span><span class="n">config</span><span class="o">,</span> <span class="s">&quot;myTable&quot;</span><span class="o">);</span>
-</span><span class='line'><span class="c1">// To do any sort of update on a row, you use an instance of the BatchUpdate</span>
-</span><span class='line'><span class="c1">// class. A BatchUpdate takes a row and optionally a timestamp which your</span>
-</span><span class='line'><span class="c1">// updates will affect. </span>
-</span><span class='line'><span class="n">BatchUpdate</span> <span class="n">batchUpdate</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BatchUpdate</span><span class="o">(</span><span class="s">&quot;myRow&quot;</span><span class="o">);</span>
-</span><span class='line'><span class="c1">// The BatchUpdate#put method takes a Text that describes what cell you want</span>
-</span><span class='line'><span class="c1">// to put a value into, and a byte array that is the value you want to </span>
-</span><span class='line'><span class="c1">// store. Note that if you want to store strings, you have to getBytes() </span>
-</span><span class='line'><span class="c1">// from the string for HBase to understand how to store it. (The same goes</span>
-</span><span class='line'><span class="c1">// for primitives like ints and longs and user-defined classes - you must </span>
-</span><span class='line'><span class="c1">// find a way to reduce it to bytes.)</span>
-</span><span class='line'><span class="n">batchUpdate</span><span class="o">.</span><span class="na">put</span><span class="o">(</span><span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">,</span> <span class="s">&quot;columnQualifier1 value!&quot;</span><span class="o">.</span><span class="na">getBytes</span><span class="o">());</span>
-</span><span class='line'><span class="c1">// Deletes are batch operations in HBase as well. </span>
-</span><span class='line'><span class="n">batchUpdate</span><span class="o">.</span><span class="na">delete</span><span class="o">(</span><span class="s">&quot;myColumnFamily:cellIWantDeleted&quot;</span><span class="o">);</span>
-</span><span class='line'><span class="c1">// Once you&#39;ve done all the puts you want, you need to commit the results.</span>
-</span><span class='line'><span class="c1">// The HTable#commit method takes the BatchUpdate instance you&#39;ve been </span>
-</span><span class='line'><span class="c1">// building and pushes the batch of changes you made into HBase.</span>
-</span><span class='line'><span class="n">table</span><span class="o">.</span><span class="na">commit</span><span class="o">(</span><span class="n">batchUpdate</span><span class="o">);</span>
-</span><span class='line'><span class="c1">// Now, to retrieve the data we just wrote. The values that come back are</span>
-</span><span class='line'><span class="c1">// Cell instances. A Cell is a combination of the value as a byte array and</span>
-</span><span class='line'><span class="c1">// the timestamp the value was stored with. If you happen to know that the </span>
-</span><span class='line'><span class="c1">// value contained is a string and want an actual string, then you must </span>
-</span><span class='line'><span class="c1">// convert it yourself.</span>
-</span><span class='line'><span class="n">Cell</span> <span class="n">cell</span> <span class="o">=</span> <span class="n">table</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;myRow&quot;</span><span class="o">,</span> <span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">);</span>
-</span><span class='line'><span class="n">String</span> <span class="n">valueStr</span> <span class="o">=</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">cell</span><span class="o">.</span><span class="na">getValue</span><span class="o">());</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Sometimes, you won&#39;t know the row you&#39;re looking for. In this case, you</span>
-</span><span class='line'><span class="c1">// use a Scanner. This will give you cursor-like interface to the contents</span>
-</span><span class='line'><span class="c1">// of the table.</span>
-</span><span class='line'><span class="n">Scanner</span> <span class="n">scanner</span> <span class="o">=</span>
-</span><span class='line'>  <span class="c1">// we want to get back only &quot;myColumnFamily:columnQualifier1&quot; when we iterate</span>
-</span><span class='line'>  <span class="n">table</span><span class="o">.</span><span class="na">getScanner</span><span class="o">(</span><span class="k">new</span> <span class="n">String</span><span class="o">[]{</span><span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">});</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Scanners in HBase 0.2 return RowResult instances. A RowResult is like the</span>
-</span><span class='line'><span class="c1">// row key and the columns all wrapped up in a single interface. </span>
-</span><span class='line'><span class="c1">// RowResult#getRow gives you the row key. RowResult also implements </span>
-</span><span class='line'><span class="c1">// Map, so you can get to your column results easily. </span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Now, for the actual iteration. One way is to use a while loop like so:</span>
-</span><span class='line'><span class="n">RowResult</span> <span class="n">rowResult</span> <span class="o">=</span> <span class="n">scanner</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">while</span><span class="o">(</span><span class="n">rowResult</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>  <span class="c1">// print out the row we found and the columns we were looking for</span>
-</span><span class='line'>  <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Found row: &quot;</span> <span class="o">+</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">rowResult</span><span class="o">.</span><span class="na">getRow</span><span class="o">())</span> <span class="o">+</span> <span class="s">&quot; with value: &quot;</span> <span class="o">+</span>
-</span><span class='line'>   <span class="n">rowResult</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">.</span><span class="na">getBytes</span><span class="o">()));</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">rowResult</span> <span class="o">=</span> <span class="n">scanner</span><span class="o">.</span><span class="na">next</span><span class="o">();</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// The other approach is to use a foreach loop. Scanners are iterable!</span>
-</span><span class='line'><span class="k">for</span> <span class="o">(</span><span class="n">RowResult</span> <span class="n">result</span> <span class="o">:</span> <span class="n">scanner</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>  <span class="c1">// print out the row we found and the columns we were looking for</span>
-</span><span class='line'>  <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;Found row: &quot;</span> <span class="o">+</span> <span class="k">new</span> <span class="n">String</span><span class="o">(</span><span class="n">result</span><span class="o">.</span><span class="na">getRow</span><span class="o">())</span> <span class="o">+</span> <span class="s">&quot; with value: &quot;</span> <span class="o">+</span>
-</span><span class='line'>   <span class="n">result</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;myColumnFamily:columnQualifier1&quot;</span><span class="o">.</span><span class="na">getBytes</span><span class="o">()));</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Make sure you close your scanners when you are done!</span>
-</span><span class='line'><span class="n">scanner</span><span class="o">.</span><span class="na">close</span><span class="o">();</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;}</span>
-</span><span class='line'><span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:java%}
+import java.io.IOException;
+import org.apache.hadoop.hbase.client.HTable;
+import org.apache.hadoop.hbase.client.Scanner;
+import org.apache.hadoop.hbase.io.BatchUpdate;
+import org.apache.hadoop.hbase.io.Cell;
+import org.apache.hadoop.hbase.io.RowResult;
+public class MyClient {
+public static void main(String args[]) throws IOException {</p>
+
+<pre><code>// You need a configuration object to tell the client where to connect.
+// But don't worry, the defaults are pulled from the local config file.
+HBaseConfiguration config = new HBaseConfiguration();
+// This instantiates an HTable object that connects you to the "myTable"
+// table. 
+HTable table = new HTable(config, "myTable");
+// To do any sort of update on a row, you use an instance of the BatchUpdate
+// class. A BatchUpdate takes a row and optionally a timestamp which your
+// updates will affect. 
+BatchUpdate batchUpdate = new BatchUpdate("myRow");
+// The BatchUpdate#put method takes a Text that describes what cell you want
+// to put a value into, and a byte array that is the value you want to 
+// store. Note that if you want to store strings, you have to getBytes() 
+// from the string for HBase to understand how to store it. (The same goes
+// for primitives like ints and longs and user-defined classes - you must 
+// find a way to reduce it to bytes.)
+batchUpdate.put("myColumnFamily:columnQualifier1", "columnQualifier1 value!".getBytes());
+// Deletes are batch operations in HBase as well. 
+batchUpdate.delete("myColumnFamily:cellIWantDeleted");
+// Once you've done all the puts you want, you need to commit the results.
+// The HTable#commit method takes the BatchUpdate instance you've been 
+// building and pushes the batch of changes you made into HBase.
+table.commit(batchUpdate);
+// Now, to retrieve the data we just wrote. The values that come back are
+// Cell instances. A Cell is a combination of the value as a byte array and
+// the timestamp the value was stored with. If you happen to know that the 
+// value contained is a string and want an actual string, then you must 
+// convert it yourself.
+Cell cell = table.get("myRow", "myColumnFamily:columnQualifier1");
+String valueStr = new String(cell.getValue());
+
+// Sometimes, you won't know the row you're looking for. In this case, you
+// use a Scanner. This will give you cursor-like interface to the contents
+// of the table.
+Scanner scanner = 
+  // we want to get back only "myColumnFamily:columnQualifier1" when we iterate
+  table.getScanner(new String[]{"myColumnFamily:columnQualifier1"});
+
+
+// Scanners in HBase 0.2 return RowResult instances. A RowResult is like the
+// row key and the columns all wrapped up in a single interface. 
+// RowResult#getRow gives you the row key. RowResult also implements 
+// Map, so you can get to your column results easily. 
+
+// Now, for the actual iteration. One way is to use a while loop like so:
+RowResult rowResult = scanner.next();
+
+while(rowResult != null) {
+  // print out the row we found and the columns we were looking for
+  System.out.println("Found row: " + new String(rowResult.getRow()) + " with value: " +
+   rowResult.get("myColumnFamily:columnQualifier1".getBytes()));
+
+  rowResult = scanner.next();
+}
+
+// The other approach is to use a foreach loop. Scanners are iterable!
+for (RowResult result : scanner) {
+  // print out the row we found and the columns we were looking for
+  System.out.println("Found row: " + new String(result.getRow()) + " with value: " +
+   result.get("myColumnFamily:columnQualifier1".getBytes()));
+}
+
+// Make sure you close your scanners when you are done!
+scanner.close();
+</code></pre>
+
+<p>}
+}
+{% endcodeblock %}</p>
 
 <h3>Voldemort:</h3>
 
@@ -758,62 +622,42 @@ $ ./bin/start-hbase.sh starting Master, logging to logs/hbase-user-master-exampl
 <li><p>Step 1: Download the code
 Download either a recent stable release or, for those who like to live more dangerously, the up-to-the-minute build from the build server.</p></li>
 <li><p>Step 2: Start single node cluster
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;blockquote&gt;&lt;p&gt;bin/voldemort-server.sh config/single_node_cluster &gt; /tmp/voldemort.log &amp;amp;
-</span></code></pre></td></tr></table></div></figure></notextile></div></p></blockquote></li>
+{% codeblock lang:bash%}</p>
+
+<blockquote><p>bin/voldemort-server.sh config/single_node_cluster > /tmp/voldemort.log &amp;
+{% endcodeblock %}</p></blockquote></li>
 <li>Step 3: Start commandline test client and do some operations</li>
 </ul>
 
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;blockquote&gt;&lt;p&gt;bin/voldemort-shell.sh <span class="nb">test </span>tcp://localhost:6666
-</span><span class='line'>  Established connection to <span class="nb">test </span>via tcp://localhost:6666
-</span><span class='line'>put &amp;ldquo;hello&amp;rdquo; &amp;ldquo;world&amp;rdquo;
-</span><span class='line'>get &amp;ldquo;hello&amp;rdquo;   version<span class="o">(</span>0:1<span class="o">)</span>: &amp;ldquo;world&amp;rdquo;
-</span><span class='line'>delete &amp;ldquo;hello&amp;rdquo;
-</span><span class='line'>get &amp;ldquo;hello&amp;rdquo;   null
-</span><span class='line'><span class="nb">exit  </span>k k thx bye.
-</span></code></pre></td></tr></table></div></figure></notextile></div></p></blockquote>
+<p>{% codeblock lang:bash%}</p>
+
+<blockquote><p>bin/voldemort-shell.sh test tcp://localhost:6666
+  Established connection to test via tcp://localhost:6666
+put &ldquo;hello&rdquo; &ldquo;world&rdquo;
+get &ldquo;hello&rdquo;   version(0:1): &ldquo;world&rdquo;
+delete &ldquo;hello&rdquo;
+get &ldquo;hello&rdquo;   null
+exit  k k thx bye.
+{% endcodeblock %}</p></blockquote>
 
 <h4>Programming</h4>
 
 <p><strong>Client</strong>
 Here is an example showing how to connect to a store as a client to do reads and writes from Java:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">String</span> <span class="n">bootstrapUrl</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="nl">tcp:</span><span class="c1">//localhost:6666&amp;rdquo;;</span>
-</span><span class='line'><span class="n">StoreClientFactory</span> <span class="n">factory</span> <span class="o">=</span> <span class="k">new</span> <span class="n">SocketStoreClientFactory</span><span class="o">(</span><span class="k">new</span> <span class="n">ClientConfig</span><span class="o">().</span><span class="na">setBootstrapUrls</span><span class="o">(</span><span class="n">bootstrapUrl</span><span class="o">));</span>
-</span><span class='line'><span class="c1">// create a client that executes operations on a single store</span>
-</span><span class='line'><span class="n">StoreClient</span> <span class="n">client</span> <span class="o">=</span> <span class="n">factory</span><span class="o">.</span><span class="na">getStoreClient</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">my_store_name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:java%}
+String bootstrapUrl = &ldquo;tcp://localhost:6666&rdquo;;
+StoreClientFactory factory = new SocketStoreClientFactory(new ClientConfig().setBootstrapUrls(bootstrapUrl));
+// create a client that executes operations on a single store
+StoreClient client = factory.getStoreClient(&ldquo;my_store_name&rdquo;);
+{% endcodeblock %}
 After initializing the store client for every store once we can reuse it to run our queries as follows:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="c1">// do some random pointless operations</span>
-</span><span class='line'>  <span class="n">Versioned</span> <span class="n">value</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="na">get</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">some_key</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
-</span><span class='line'>  <span class="n">value</span><span class="o">.</span><span class="na">setObject</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">some_value</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
-</span><span class='line'>  <span class="n">client</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">some_key</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="n">value</span><span class="o">);</span>
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:java%}
+// do some random pointless operations
+  Versioned value = client.get(&ldquo;some_key&rdquo;);
+  value.setObject(&ldquo;some_value&rdquo;);
+  client.put(&ldquo;some_key&rdquo;, value);
+ {% endcodeblock %}</p>
 
 <p>Note that StoreClient is just an interface, so for the purpose of unit testing we can completely mock the storage layer. This is something that is essentially impossible to do with a normal relational db since sql is the interface and it is vendor specific.</p>
 
@@ -822,40 +666,28 @@ After initializing the store client for every store once we can reuse it to run 
 <p>There are three methods for using the server:
 1. Start from the command line
 You must first build the jar file using ant, as described above, then do the following:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ VOLDEMORT_HOME</span><span class="o">=</span>&amp;lsquo;/path/to/voldemort&amp;rsquo;
-</span><span class='line'><span class="nv">$ </span><span class="nb">cd</span> <span class="nv">$VOLDEMORT_HOME</span>
-</span><span class='line'><span class="nv">$ </span>./bin/voldemort-server.sh
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:bash%}
+$ VOLDEMORT_HOME=&lsquo;/path/to/voldemort&rsquo;
+$ cd $VOLDEMORT_HOME
+$ ./bin/voldemort-server.sh
+ {% endcodeblock %}</p>
 
 <p>Alternately we can give VOLDEMORT_HOME on the command line and avoid having to set an environment variable
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>./bin/voldemort-server.sh /path/to/voldemort
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+$ ./bin/voldemort-server.sh /path/to/voldemort
+ {% endcodeblock %}
 2. Embedded Server
 You can instantiate the server directly in your code.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">VoldemortConfig</span> <span class="n">config</span> <span class="o">=</span> <span class="n">VoldemortConfig</span><span class="o">.</span><span class="na">loadFromEnvironmentVariable</span><span class="o">();</span>
-</span><span class='line'><span class="n">VoldemortServer</span> <span class="n">server</span> <span class="o">=</span> <span class="k">new</span> <span class="n">VoldemortServer</span><span class="o">(</span><span class="n">config</span><span class="o">);</span>
-</span><span class='line'><span class="n">server</span><span class="o">.</span><span class="na">start</span><span class="o">();</span>
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:java%}
+VoldemortConfig config = VoldemortConfig.loadFromEnvironmentVariable();
+VoldemortServer server = new VoldemortServer(config);
+server.start();
+ {% endcodeblock %}
 3. Deploy as a war
 To do this build the war file using the
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>ant war
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+ant war
+ {% endcodeblock %}
 target and deploy via whatever mechanism your servlet container supports.</p>
 
 <h4>Kyoto Cabinet:</h4>
@@ -864,209 +696,142 @@ target and deploy via whatever mechanism your servlet container supports.</p>
 
 <p>Install the latest version of Kyoto Cabinet beforehand and get the package of the Java binding of Kyoto Cabinet. JDK 6 or later is also required.
 Enter the directory of the extracted package then perform installation.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>./configure
-</span><span class='line'> make
-</span><span class='line'> make check
-</span><span class='line'> su make install
-</span><span class='line'>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+./configure
+ make
+ make check
+ su make install
+ {% endcodeblock %}
 When a series of work finishes, the JAR file <code>kyotocabinet.jar' and the shared object files</code>libjkyotocabinet.so' and so on are installed under <code>/usr/local/lib'.
 Let the class search path include</code>/usr/local/lib/kyotocabinet.jar' and let the library search path include <code>/usr/local/lib'.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">CLASSPATH</span><span class="o">=</span><span class="s2">&quot;$CLASSPATH:/usr/local/lib/kyotocabinet.jar&quot;</span> <span class="nv">LD_LIBRARY_PATH</span><span class="o">=</span><span class="s2">&quot;$LD_LIBRARY_PATH:/usr/local/lib&quot;</span> <span class="nb">export </span>CLASSPATH LD_LIBRARY_PATH
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+CLASSPATH="$CLASSPATH:/usr/local/lib/kyotocabinet.jar" LD_LIBRARY_PATH="$LD_LIBRARY_PATH:/usr/local/lib" export CLASSPATH LD_LIBRARY_PATH
+{% endcodeblock %}
 The above settings can be specified by options of the runtime command.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'>java -cp .:kyotocabinet.jar -Djava.library.path<span class="o">=</span>.:/usr/local/lib FooBarBaz ...
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+java -cp .:kyotocabinet.jar -Djava.library.path=.:/usr/local/lib FooBarBaz ...
+{% endcodeblock %}
 All symbols of Kyoto Cabinet are defined in the package</code>kyotocabinet'. You can access them without any prefix by importing the package.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">kyotocabinet.*</span><span class="o">;</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:java%}
+import kyotocabinet.*;
+{% endcodeblock %}</p>
 
 <h5>Programming</h5>
 
 <p>The following code is a typical example to use a database.
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="kn">import</span> <span class="nn">kyotocabinet.*</span><span class="o">;&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">class</span> <span class="nc">KCDBEX1</span> <span class="o">{</span> <span class="o">&lt;</span><span class="n">br</span><span class="o">/&gt;</span>
-</span><span class='line'><span class="kd">public</span> <span class="kd">static</span> <span class="kt">void</span> <span class="nf">main</span><span class="o">(</span><span class="n">String</span><span class="o">[]</span> <span class="n">args</span><span class="o">)</span> <span class="o">{&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span>  <span class="c1">// create the object</span>
-</span><span class='line'> <span class="n">DB</span> <span class="n">db</span> <span class="o">=</span> <span class="k">new</span> <span class="n">DB</span><span class="o">();</span>
-</span><span class='line'>  <span class="c1">// open the database</span>
-</span><span class='line'> <span class="k">if</span> <span class="o">(!</span><span class="n">db</span><span class="o">.</span><span class="na">open</span><span class="o">(</span><span class="s">&quot;casket.kch&quot;</span><span class="o">,</span> <span class="n">DB</span><span class="o">.</span><span class="na">OWRITER</span> <span class="o">|</span> <span class="n">DB</span><span class="o">.</span><span class="na">OCREATE</span><span class="o">)){</span>
-</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;open error: &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="o">.</span><span class="na">error</span><span class="o">());</span>
-</span><span class='line'> <span class="o">}</span>
-</span><span class='line'>  <span class="c1">// store records</span>
-</span><span class='line'> <span class="k">if</span> <span class="o">(!</span><span class="n">db</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">&quot;foo&quot;</span><span class="o">,</span> <span class="s">&quot;hop&quot;</span><span class="o">)</span> <span class="o">||</span>
-</span><span class='line'>     <span class="o">!</span><span class="n">db</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">&quot;bar&quot;</span><span class="o">,</span> <span class="s">&quot;step&quot;</span><span class="o">)</span> <span class="o">||</span>
-</span><span class='line'>     <span class="o">!</span><span class="n">db</span><span class="o">.</span><span class="na">set</span><span class="o">(</span><span class="s">&quot;baz&quot;</span><span class="o">,</span> <span class="s">&quot;jump&quot;</span><span class="o">)){</span>
-</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;set error: &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="o">.</span><span class="na">error</span><span class="o">());</span>
-</span><span class='line'> <span class="o">}</span>
-</span><span class='line'>  <span class="c1">// retrieve records</span>
-</span><span class='line'> <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">get</span><span class="o">(</span><span class="s">&quot;foo&quot;</span><span class="o">);</span>
-</span><span class='line'> <span class="k">if</span> <span class="o">(</span><span class="n">value</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">){</span>
-</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">value</span><span class="o">);</span>
-</span><span class='line'> <span class="o">}</span> <span class="k">else</span> <span class="o">{</span>
-</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;set error: &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="o">.</span><span class="na">error</span><span class="o">());</span>
-</span><span class='line'> <span class="o">}</span>
-</span><span class='line'>  <span class="c1">// traverse records</span>
-</span><span class='line'> <span class="n">Cursor</span> <span class="n">cur</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="na">cursor</span><span class="o">();</span>
-</span><span class='line'> <span class="n">cur</span><span class="o">.</span><span class="na">jump</span><span class="o">();</span>
-</span><span class='line'> <span class="n">String</span><span class="o">[]</span> <span class="n">rec</span><span class="o">;</span>
-</span><span class='line'> <span class="k">while</span> <span class="o">((</span><span class="n">rec</span> <span class="o">=</span> <span class="n">cur</span><span class="o">.</span><span class="na">get_str</span><span class="o">(</span><span class="kc">true</span><span class="o">))</span> <span class="o">!=</span> <span class="kc">null</span><span class="o">)</span> <span class="o">{</span>
-</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">out</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="n">rec</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span> <span class="o">+</span> <span class="s">&quot;:&quot;</span> <span class="o">+</span> <span class="n">rec</span><span class="o">[</span><span class="mi">1</span><span class="o">]);</span>
-</span><span class='line'> <span class="o">}</span>
-</span><span class='line'> <span class="n">cur</span><span class="o">.</span><span class="na">disable</span><span class="o">();</span>
-</span><span class='line'>  <span class="c1">// close the database</span>
-</span><span class='line'> <span class="k">if</span><span class="o">(!</span><span class="n">db</span><span class="o">.</span><span class="na">close</span><span class="o">()){</span>
-</span><span class='line'>   <span class="n">System</span><span class="o">.</span><span class="na">err</span><span class="o">.</span><span class="na">println</span><span class="o">(</span><span class="s">&quot;close error: &quot;</span> <span class="o">+</span> <span class="n">db</span><span class="o">.</span><span class="na">error</span><span class="o">());</span>
-</span><span class='line'> <span class="o">}</span>
-</span><span class='line'><span class="o">}</span>
-</span><span class='line'><span class="o">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span> <span class="o">}</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:java%}
+import kyotocabinet.*;<br/>
+public class KCDBEX1 { <br/>
+public static void main(String[] args) {</p>
+
+<pre><code>  // create the object
+ DB db = new DB();
+  // open the database
+ if (!db.open("casket.kch", DB.OWRITER | DB.OCREATE)){
+   System.err.println("open error: " + db.error());
+ }
+  // store records
+ if (!db.set("foo", "hop") ||
+     !db.set("bar", "step") ||
+     !db.set("baz", "jump")){
+   System.err.println("set error: " + db.error());
+ }
+  // retrieve records
+ String value = db.get("foo");
+ if (value != null){
+   System.out.println(value);
+ } else {
+   System.err.println("set error: " + db.error());
+ }
+  // traverse records
+ Cursor cur = db.cursor();
+ cur.jump();
+ String[] rec;
+ while ((rec = cur.get_str(true)) != null) {
+   System.out.println(rec[0] + ":" + rec[1]);
+ }
+ cur.disable();
+  // close the database
+ if(!db.close()){
+   System.err.println("close error: " + db.error());
+ }
+}
+</code></pre>
+
+<p> }
+{% endcodeblock %}</p>
 
 <h4>Redis</h4>
 
 <h5>Setup</h5>
 
 <p>Download, extract and compile Redis with:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'> <span class="nv">$ </span>wget &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://redis.googlecode.com/files/redis-2.2.12.tar.gz&quot;</span>&gt;http://redis.googlecode.com/files/redis-2.2.12.tar.gz&lt;/a&gt;
-</span><span class='line'> <span class="nv">$ </span>tar xzf redis-2.2.12.tar.gz
-</span><span class='line'> <span class="nv">$ </span><span class="nb">cd </span>redis-2.2.12
-</span><span class='line'> <span class="nv">$ </span>make
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:bash%}
+ $ wget <a href="http://redis.googlecode.com/files/redis-2.2.12.tar.gz">http://redis.googlecode.com/files/redis-2.2.12.tar.gz</a>
+ $ tar xzf redis-2.2.12.tar.gz
+ $ cd redis-2.2.12
+ $ make
+{% endcodeblock %}</p>
 
 <h5>Programming</h5>
 
 <p>Many Java clients, using Jedis for example:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="n">Jedis</span> <span class="n">jedis</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Jedis</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">localhost</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
-</span><span class='line'> <span class="n">jedis</span><span class="o">.</span><span class="na">set</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">foo</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">bar</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
-</span><span class='line'> <span class="n">String</span> <span class="n">value</span> <span class="o">=</span> <span class="n">jedis</span><span class="o">.</span><span class="na">get</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">foo</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+{% codeblock lang:java%}
+ Jedis jedis = new Jedis(&ldquo;localhost&rdquo;);
+ jedis.set(&ldquo;foo&rdquo;, &ldquo;bar&rdquo;);
+ String value = jedis.get(&ldquo;foo&rdquo;);
+{% endcodeblock %}</p>
 
 <h3>MongoDB</h3>
 
 <h4>Setup</h4>
 
 <p>64-bit binaries
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>curl &lt;a <span class="nv">href</span><span class="o">=</span><span class="s2">&quot;http://downloads.mongodb.org/osx/mongodb-osx-x86_64-x.y.z.tgz&quot;</span>&gt;http://downloads.mongodb.org/osx/mongodb-osx-x86_64-x.y.z.tgz&lt;/a&gt; &gt; mongo.tgz <span class="nv">$ </span>tar xzf mongo.tgz
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+$ curl <a href="http://downloads.mongodb.org/osx/mongodb-osx-x86_64-x.y.z.tgz">http://downloads.mongodb.org/osx/mongodb-osx-x86_64-x.y.z.tgz</a> > mongo.tgz $ tar xzf mongo.tgz
+{% endcodeblock %}
 Replace x.y.z with the current stable version.
 Create a data directory
 By default MongoDB will store data in /data/db, but it won&rsquo;t automatically create that directory. To create it, do:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>mkdir -p /data/db
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+$ mkdir -p /data/db
+{% endcodeblock %}
 You can also tell MongoDB to use a different data directory, with the &mdash;dbpath option.
 Run and connect to the server
 First, start the MongoDB server in one terminal:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>./mongodb-xxxxxxx/bin/mongod
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+$ ./mongodb-xxxxxxx/bin/mongod
+{% endcodeblock %}
 In a separate terminal, start the shell, which will connect to localhost by default:
-<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nv">$ </span>./mongodb-xxxxxxx/bin/mongo &gt; db.foo.save<span class="o">(</span> <span class="o">{</span> a : 1 <span class="o">}</span> <span class="o">)</span> &gt; db.foo.find<span class="o">()</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div>
+{% codeblock lang:bash%}
+$ ./mongodb-xxxxxxx/bin/mongo > db.foo.save( { a : 1 } ) > db.foo.find()
+{% endcodeblock %}
 Congratulations, you&rsquo;ve just saved and retrieved your first document with MongoDB!</p>
 
 <h4>Programming</h4>
 
-<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.Mongo</span><span class="o">;</span>
-</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.DB</span><span class="o">;</span>
-</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.DBCollection</span><span class="o">;</span>
-</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.BasicDBObject</span><span class="o">;</span>
-</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.DBObject</span><span class="o">;</span>
-</span><span class='line'> <span class="kn">import</span> <span class="nn">com.mongodb.DBCursor</span><span class="o">;&lt;/</span><span class="n">p</span><span class="o">&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="n">p</span><span class="o">&gt;</span> <span class="n">Mongo</span> <span class="n">m</span> <span class="o">=</span> <span class="k">new</span> <span class="n">Mongo</span><span class="o">();</span>
-</span><span class='line'> <span class="c1">// or Mongo m = new Mongo( &amp;ldquo;localhost&amp;rdquo; );</span>
-</span><span class='line'> <span class="c1">// or Mongo m = new Mongo( &amp;ldquo;localhost&amp;rdquo; , 27017 );</span>
-</span><span class='line'> <span class="n">DB</span> <span class="n">db</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="na">getDB</span><span class="o">(</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">mydb</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;</span> <span class="o">);</span>
-</span><span class='line'> <span class="n">BasicDBObject</span> <span class="n">doc</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicDBObject</span><span class="o">();</span>
-</span><span class='line'> <span class="n">doc</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">name</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">MongoDB</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
-</span><span class='line'> <span class="n">doc</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">type</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">database</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;);</span>
-</span><span class='line'> <span class="n">doc</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">count</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="mi">1</span><span class="o">);</span>
-</span><span class='line'> <span class="n">BasicDBObject</span> <span class="n">info</span> <span class="o">=</span> <span class="k">new</span> <span class="n">BasicDBObject</span><span class="o">();</span>
-</span><span class='line'> <span class="n">info</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">x</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="mi">203</span><span class="o">);</span>
-</span><span class='line'> <span class="n">info</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">y</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="mi">102</span><span class="o">);</span>
-</span><span class='line'> <span class="n">doc</span><span class="o">.</span><span class="na">put</span><span class="o">(&amp;</span><span class="n">ldquo</span><span class="o">;</span><span class="n">info</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="o">;,</span> <span class="n">info</span><span class="o">);</span>
-</span><span class='line'> <span class="n">coll</span><span class="o">.</span><span class="na">insert</span><span class="o">(</span><span class="n">doc</span><span class="o">);</span>
-</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+<p>{% codeblock lang:java%}
+ import com.mongodb.Mongo;
+ import com.mongodb.DB;
+ import com.mongodb.DBCollection;
+ import com.mongodb.BasicDBObject;
+ import com.mongodb.DBObject;
+ import com.mongodb.DBCursor;</p>
+
+<p> Mongo m = new Mongo();
+ // or Mongo m = new Mongo( &ldquo;localhost&rdquo; );
+ // or Mongo m = new Mongo( &ldquo;localhost&rdquo; , 27017 );
+ DB db = m.getDB( &ldquo;mydb&rdquo; );
+ BasicDBObject doc = new BasicDBObject();
+ doc.put(&ldquo;name&rdquo;, &ldquo;MongoDB&rdquo;);
+ doc.put(&ldquo;type&rdquo;, &ldquo;database&rdquo;);
+ doc.put(&ldquo;count&rdquo;, 1);
+ BasicDBObject info = new BasicDBObject();
+ info.put(&ldquo;x&rdquo;, 203);
+ info.put(&ldquo;y&rdquo;, 102);
+ doc.put(&ldquo;info&rdquo;, info);
+ coll.insert(doc);
+{% endcodeblock %}</p>
 ]]></content>
   </entry>
   
