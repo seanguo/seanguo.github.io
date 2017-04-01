@@ -3,14 +3,16 @@ layout: post
 title: "Chef 介绍 Part1 Setup"
 date: 2017-02-17 20:20:59 +0800
 comments: true
-categories: Tools
+categories: tool chef
 keywords: Chef Tool Operation Devops
 ---
 
 ##引言
 Chef是一个自动化部署的工具。它的思想是“Infrastructure as code”, 所以整个DevOps流程下来都是代码，都可以保存在代码仓库里面。像Chef之类的工具出现之前，简单部署的话就是手工来了，像Java的web应用手工部署个War包或者改个配置文件什么的，高级点的可能会写个shell脚本来自动化。但是当需要管理的机器增多或者配置项增多，或者不同的机器要求不一样的配置的话，就力不从心了。Chef出现之后，这样的难题就迎刃而解了。
 
-Chef的实现是用的Ruby，所以它的配置脚本也是基于Ruby的, 所以想要学好Chef也需要了解一下Ruby的基本语法，如果想要扩展，定制，增加自己的Chef库的话，还是需要仔细学习一下Ruby才行。这导致Chef陡峭的学习曲线，了解个皮毛很容易，但是想要深入了解，诊断问题的话需要做很多功课才可以。想要学习，我们先当环境，在应用中学习是最有成效的。
+Chef的实现是用的Ruby，所以它的配置脚本也是基于Ruby的, 所以想要学好Chef也需要了解一下Ruby的基本语法，如果想要扩展，定制，增加自己的Chef库的话，还是需要仔细学习一下Ruby才行。这导致Chef陡峭的学习曲线，了解个皮毛很容易，但是想要深入了解，诊断问题的话需要做很多功课才可以。
+
+想要学好，我们先搭环境，在应用中学习是最有成效的。
 
 ##安装
 Chef安装很简单，就去下载一个叫做[Chef DK](https://downloads.chef.io/)的包安装就可以了。这个会把Chef全家桶装好，里面开发测试用的所有工具都包含了。
@@ -102,12 +104,12 @@ Running handlers complete
 Chef Client finished, 1/1 resources updated in 12 seconds
 {% endcodeblock %}
 
-这表示成功执行完了，可以到那个地方检察一下这个文件是否被创建了。
+这表示成功执行完了，可以到那个地方检查一下这个文件是否被创建了。
 {% codeblock lang:bash%}
 cat /tmp/test.txt 
 This is myfirst sample
 {% endcodeblock %}     
-到这之后然后可能会想要修改这个mode， 这可以通过Attribute来实现。
+到这之后然后可能会想要修改文件的mode， 这可以通过Attribute来实现。
 
 {% codeblock lang:ruby%}
 file '/tmp/test.txt' do
@@ -129,7 +131,7 @@ end
   	}
   }
  {% endcodeblock %}
- 再次运行这个cookbook可以看到输出已经把文件的mode改成644了，通过这种方式我们就可以从外面覆盖cookbook的默认值，达到定制化配置的目的。
+ 再次运行这个cookbook可以看到输出已经把文件的mode改成644了，通过这种方式我们就可以通过从外面的配置覆盖cookbook的默认值，达到定制化配置的目的。
  {% codeblock lang:bash%}
  Recipe: sample1::default
   * file[/tmp/test.txt] action create
