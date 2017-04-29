@@ -1,0 +1,300 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Protocol | Sean's Blog]]></title>
+  <link href="http://www.seanguo.com/blog/categories/protocol/atom.xml" rel="self"/>
+  <link href="http://www.seanguo.com/"/>
+  <updated>2017-04-29T22:54:44+08:00</updated>
+  <id>http://www.seanguo.com/</id>
+  <author>
+    <name><![CDATA[Sean Guo]]></name>
+    <email><![CDATA[seanguo85@qq.com]]></email>
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[SIP Headers]]></title>
+    <link href="http://www.seanguo.com/blog/2017/04/23/sip-headers/"/>
+    <updated>2017-04-23T19:45:06+08:00</updated>
+    <id>http://www.seanguo.com/blog/2017/04/23/sip-headers</id>
+    <content type="html"><![CDATA[<h2>引言</h2>
+
+<p>SIP协议的设计很多参考了已有的HTTP协议，例如都是用的文本，验证用户相关的header和content-type和body的设计。这里主要说一下SIP独有的这些header，其中对路由相关的header又是重点要说的。</p>
+
+<h2>From和To</h2>
+
+<p>这两个header是作为标识存在的，对协议本身的路由来说不起什么作用。在实际电话呼叫中会标识主叫方和被叫方。其中的tag参数被选用来标识session。除了这两个tag参数外，session的标识还要用到另外一个header： Call-ID的值。下面是<a href="https://tools.ietf.org/html/rfc3261">RFC3261</a>里面的一个例子：
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>From: &ldquo;Bob&rdquo; &lt;sips:&lt;a href="&#x6d;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#x62;&#x6f;&#x62;&#x40;&#98;&#105;&#108;&#111;&#x78;&#105;&#x2e;&#99;&#111;&#x6d;">&#x62;&#111;&#98;&#x40;&#98;&#105;&#x6c;&#111;&#x78;&#105;&#x2e;&#99;&#x6f;&#x6d;&lt;/a>> ;tag=a48s
+</span><span class='line'>From: sip:+12125551212@phone2net.com;tag=887s
+</span><span class='line'>From: Anonymous &lt;sip:&lt;a href="&#x6d;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#58;&#x63;&#x38;&#111;&#x71;&#x7a;&#56;&#52;&#x7a;&#x6b;&#55;&#122;&#x40;&#112;&#x72;&#x69;&#x76;&#97;&#99;&#121;&#46;&#x6f;&#114;&#x67;">&#99;&#56;&#111;&#113;&#x7a;&#x38;&#x34;&#x7a;&#x6b;&#55;&#x7a;&#64;&#x70;&#x72;&#x69;&#118;&#97;&#x63;&#121;&#46;&#x6f;&#x72;&#x67;&lt;/a>>;tag=hyh8&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;p>To: Carol &lt;sip:&lt;a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#99;&#x61;&#x72;&#x6f;&#x6c;&#64;&#99;&#104;&#x69;&#x63;&#x61;&#103;&#111;&#46;&#99;&#x6f;&#x6d;">&#99;&#97;&#x72;&#111;&#x6c;&#x40;&#99;&#104;&#105;&#x63;&#x61;&#103;&#111;&#46;&#99;&#111;&#109;&lt;/a>></span></code></pre></td></tr></table></div></figure></notextile></div>
+可以看到这两个header里可以包含一个用来描述这个URI的display name。在呼叫中这个就会用来标识呼叫的主被叫的名字。</p>
+
+<p>From和To在一侧的请求和响应里是一致的，但是和呼叫另一侧发过来的请求是相反的。</p>
+
+<h2>Contact</h2>
+
+<p>这个header用来标识session内这个UA期望对方request发送到的地址。在一个Invite发起的session中，一般会包含在Invite和对应的响应里。它所表示的地址就是session内ACK，Bye，re-Invite等发送到这个UA的地址。
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Contact: &lt;sip:pc33.atlanta.com></span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<h2>Via</h2>
+
+<p>上面讲的Contact是为request指示地址，而Via是为request对应的response来指示地址的。它是在request被发送的时候添加的，而对方收到请求之后会把响应发给这个header标示的地址。如果涉及到NAT或者防火墙之类的，这个发送方添加的地址和接收方收到的源地址不同的情况。这种情况下协议添加了个received的参数来标示实际收到的request是从哪发来的。这样保证了response能原路发送回request发送方。RFC3261中介绍了这种情况下的一个例子：
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>INVITE sip:&lt;a href="&#x6d;&#x61;&#105;&#108;&#116;&#111;&#x3a;&#x62;&#111;&#x62;&#x40;&#66;&#105;&#108;&#x6f;&#120;&#105;&#x2e;&#99;&#x6f;&#x6d;">&#98;&#x6f;&#x62;&#x40;&#x42;&#x69;&#x6c;&#111;&#x78;&#x69;&#x2e;&#x63;&#111;&#x6d;&lt;/a> SIP/2.0
+</span><span class='line'>Via: SIP/2.0/UDP bobspc.biloxi.com:5060</span></code></pre></td></tr></table></div></figure></notextile></div>
+这个request的接收方发现它的源地址是和via里面的地址不一样的，所以就在里面加上了received参数来标示实际的源地址：
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>INVITE sip:&lt;a href="&#x6d;&#97;&#x69;&#108;&#116;&#111;&#x3a;&#x62;&#x6f;&#98;&#64;&#x42;&#105;&#x6c;&#x6f;&#x78;&#x69;&#x2e;&#99;&#111;&#109;">&#98;&#x6f;&#98;&#64;&#x42;&#x69;&#x6c;&#111;&#x78;&#x69;&#x2e;&#x63;&#111;&#x6d;&lt;/a> SIP/2.0
+</span><span class='line'>Via: SIP/2.0/UDP bobspc.biloxi.com:5060;received=192.0.2.4</span></code></pre></td></tr></table></div></figure></notextile></div></p>
+
+<p>Via里面还有个重要的参数branch来标示这个request对应的transaction。</p>
+
+<h2>Request-Uri</h2>
+
+<p>这个准确来说不是一个header，因为它是request第一行里请求类型后面的URI。它是用来标识请求要发向的地址的，因为我们前面说了To header不决定路由。</p>
+
+<h2>Route和Record-Route</h2>
+
+<p>在没有Proxy的情况下只要一个Request-Uri就能把request路由到目的地了，但是实际情况是request总要经过一些Proxy来达到目的地。所以我们还要用Route来标示请求中间经过的节点。当Proxy收到请求后发现top Route是自己的地址就会去掉转发给下一个目的地。如果这个Proxy配置成Record Route的，就会在请求中加入Record-Route这个header，这个header的加入就表示session内的其他请求也会经过这个节点。所以Record-Route是保存在session内的状态，它和Contact共同决定了session内请求的路由路径。</p>
+
+<p><div class='bogus-wrapper'><notextile><figure class='code'><figcaption><span>Simple Proxy </span></figcaption>
+<div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>+&mdash;&mdash;&mdash;&mdash;&ndash;+              +&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;+              +&mdash;&mdash;&mdash;&mdash;&mdash;&ndash;+
+</span><span class='line'>|         |              |           |              |           |
+</span><span class='line'>|UA-Caller|              |  Proxy    |              | UA-Callee |
+</span><span class='line'>+&mdash;&mdash;+&mdash;&mdash;+              +&mdash;&mdash;&ndash;+&mdash;&mdash;&ndash;+              +&mdash;&mdash;&ndash;+&mdash;&mdash;&ndash;+&lt;/p>
+</span><span class='line'>
+</span><span class='line'>&lt;pre>&lt;code> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> +-------------------------&gt;                          |
+</span><span class='line'> |INVITE sip:callee@192.168.1.7                       |
+</span><span class='line'> |Route: sip:192.168.1.5                              |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         +--------------------------&gt;
+</span><span class='line'> |                         |    INVITE sip:callee@192.168.1.7
+</span><span class='line'> |                         |    Record-Route: sip:192.168.1.5
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         &lt;--------------------------+
+</span><span class='line'> |                         |   SIP/2.0 200 OK         |
+</span><span class='line'> |                         |   Record-Route: sip:192.168.1.5
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> &lt;-------------------------+                          |
+</span><span class='line'> |   SIP/2.0 200OK         |                          |
+</span><span class='line'> |   Record-Route: sip:192.168.1.5                    |
+</span><span class='line'> |                         +                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> +-------------------------&gt;                          |
+</span><span class='line'> |   BYE sip:callee@192.168.1.5                       |
+</span><span class='line'> |   Route: sip:192.168.1.5|                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         +--------------------------&gt;
+</span><span class='line'> |                         |   BYE sip:callee@192.168.1.5
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> |                         |                          |
+</span><span class='line'> +                         +                          +
+</span><span class='line'>&lt;/code>&lt;/pre>
+</span><span class='line'>
+</span><span class='line'>&lt;p></span></code></pre></td></tr></table></div></figure></notextile></div>
+这里的Record-Route通过INVITE传给了UA-Callee，并通过200OK返回给了UA-Caller，保证了后续的BYE（UA-Callee发起的也是一样）必须经过Proxy才能到对方。</p>
+
+<p>如果request需要经过多个Proxy，就有可能会有多个Record-Route。这个Record-Route的添加也是按顺序添加到request里的，这样保证消息能够按初始request的路径来路由。</p>
+
+<p>如果这个Proxy正好部署在网络边界上（多网卡机器），有可能UA-Caller这侧是一个网段而UA-Callee成了另一个网段，或者两侧使用的transport不同。这样由于Record-Route是共享给两侧使用的，这就会造成一侧的消息发不到Proxy。因为Record-Route没有像Via那样可以加个received的参数来揭示源地址。</p>
+
+<p><a href="https://tools.ietf.org/html/rfc5658">RFC5658</a>通过添加两个Record-Route来巧妙的解决了这个问题。可以直接参考那个RFC里面的这个例子：</p>
+
+<p>```</p>
+
+<pre><code>   UA1              Proxy "P1"               UA2
+  (IPv4)            (IPv4/IPv6)             (IPv6)
+    |                    |                    |
+    |   F1 INVITE        |                    |
+    |-------------------&gt;|      F2 INVITE     |
+    |                    |-------------------&gt;|
+    |    100 Trying      |                    |
+    |&lt;-------------------|                    |
+    |                    |    F3 200 OK       |
+    |    F4 200 OK       |&lt;-------------------|
+    |&lt;-------------------|                    |
+    |                    |                    |
+    |       F5 ACK       |                    |
+    |-------------------&gt;|       F6 ACK       |
+    |                    |-------------------&gt;|
+    |                    |                    |
+    |                    |        F7 BYE      |
+    |       F8 BYE       |&lt;-------------------|
+    |&lt;-------------------|                    |
+
+        Figure 2: IPv4 to IPv6 Multi-Homed Proxy Illustration
+</code></pre>
+
+<p>   F1 INVITE UA1 &ndash;> P1 (192.0.2.254:5060)</p>
+
+<p>   INVITE sip:<a href="&#109;&#97;&#105;&#x6c;&#x74;&#111;&#x3a;&#x62;&#111;&#98;&#64;&#x62;&#x69;&#108;&#111;&#x78;&#105;&#46;&#x65;&#120;&#97;&#109;&#112;&#x6c;&#101;&#x2e;&#99;&#x6f;&#x6d;">&#98;&#111;&#x62;&#x40;&#98;&#105;&#108;&#x6f;&#x78;&#x69;&#x2e;&#x65;&#120;&#x61;&#x6d;&#112;&#x6c;&#101;&#46;&#x63;&#x6f;&#x6d;</a> SIP/2.0
+   Route: &lt;sip:192.0.2.254:5060;lr>
+   From: Alice &lt;sip:<a href="&#x6d;&#x61;&#x69;&#108;&#x74;&#111;&#x3a;&#97;&#x6c;&#x69;&#99;&#101;&#64;&#x61;&#116;&#x6c;&#97;&#x6e;&#116;&#x61;&#x2e;&#101;&#120;&#97;&#109;&#x70;&#108;&#x65;&#46;&#99;&#111;&#x6d;">&#x61;&#x6c;&#105;&#x63;&#x65;&#x40;&#x61;&#x74;&#108;&#97;&#x6e;&#x74;&#x61;&#46;&#101;&#x78;&#x61;&#109;&#112;&#108;&#x65;&#x2e;&#99;&#x6f;&#109;</a>>;tag=1234
+   To: Bob &lt;sip:<a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#111;&#58;&#x62;&#111;&#x62;&#x40;&#x62;&#x69;&#108;&#111;&#x78;&#x69;&#x2e;&#101;&#x78;&#x61;&#x6d;&#x70;&#x6c;&#x65;&#x2e;&#99;&#111;&#109;">&#98;&#x6f;&#x62;&#64;&#98;&#105;&#x6c;&#111;&#120;&#105;&#x2e;&#101;&#x78;&#97;&#x6d;&#x70;&#108;&#101;&#x2e;&#x63;&#111;&#109;</a>>
+   Contact: &lt;sip:<a href="&#109;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#x61;&#x6c;&#105;&#99;&#101;&#x40;&#49;&#57;&#50;&#46;&#48;&#46;&#x32;&#46;&#49;">&#97;&#x6c;&#x69;&#99;&#x65;&#64;&#49;&#x39;&#x32;&#46;&#48;&#46;&#50;&#x2e;&#x31;</a>></p>
+
+<pre><code>       F2 INVITE P1 (2001:db8::1) -&gt; UA2
+
+       INVITE sip:bob@biloxi.example.com SIP/2.0
+       Record-Route: &lt;sip:[2001:db8::1];lr&gt;
+       Record-Route: &lt;sip:192.0.2.254:5060;lr&gt;
+       From: Alice &lt;sip:alice@atlanta.example.com&gt;;tag=1234
+       To: Bob &lt;sip:bob@biloxi.example.com&gt;
+       Contact: &lt;sip:alice@192.0.2.1&gt;
+
+               Dialog State at UA2:
+               Local URI     = sip:bob@biloxi.example.com
+               Remote URI    = sip:alice@atlanta.example.com
+               Remote target = sip:alice@192.0.2.1
+               Route Set     = sip:[2001:db8::1];lr
+                               sip:192.0.2.254:5060:lr
+
+
+               F3 200 OK UA2 -&gt; P1 (2001:db8::1)
+
+               SIP/2.0 200 OK
+               Record-Route: &lt;sip:[2001:db8::1];lr&gt;
+               Record-Route: &lt;sip:192.0.2.254:5060;lr&gt;
+               From: Alice &lt;sip:alice@atlanta.example.com&gt;;tag=1234
+               To: Bob &lt;sip:bob@biloxi.example.com&gt;;tag=4567
+               Contact: &lt;sip:bob@[2001:db8::33]&gt;
+
+       F4 200 OK P1 -&gt; UA1
+
+       SIP/2.0 200 OK
+       Record-Route: &lt;sip:[2001:db8::1];lr&gt;
+       Record-Route: &lt;sip:192.0.2.254:5060;lr&gt;
+       From: Alice &lt;sip:alice@atlanta.example.com&gt;;tag=1234
+       To: Bob &lt;sip:bob@biloxi.example.com&gt;;tag=4567
+       Contact: &lt;sip:bob@[2001:db8::33]&gt;
+</code></pre>
+
+<p>   Dialog State at UA1:
+   Local URI     = sip:<a href="&#x6d;&#97;&#105;&#x6c;&#116;&#111;&#58;&#97;&#108;&#105;&#99;&#x65;&#x40;&#97;&#x74;&#x6c;&#97;&#x6e;&#116;&#97;&#46;&#x65;&#120;&#97;&#109;&#x70;&#108;&#101;&#x2e;&#x63;&#111;&#109;">&#x61;&#108;&#105;&#x63;&#x65;&#64;&#x61;&#x74;&#x6c;&#97;&#110;&#116;&#97;&#46;&#x65;&#120;&#x61;&#x6d;&#112;&#x6c;&#101;&#x2e;&#x63;&#111;&#109;</a>
+   Remote URI    = sip:<a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#111;&#x3a;&#x62;&#111;&#98;&#64;&#98;&#105;&#108;&#x6f;&#120;&#105;&#x2e;&#101;&#120;&#97;&#109;&#x70;&#108;&#101;&#x2e;&#99;&#x6f;&#109;">&#x62;&#x6f;&#98;&#64;&#x62;&#105;&#x6c;&#x6f;&#x78;&#105;&#x2e;&#x65;&#x78;&#x61;&#x6d;&#x70;&#x6c;&#x65;&#x2e;&#99;&#x6f;&#109;</a>
+   Remote target = sip:bob@[2001:db8::33]
+   Route Set     = sip:192.0.2.254:5060:lr</p>
+
+<pre><code>               sip:[2001:db8::1];lr
+</code></pre>
+
+<p>   F5 ACK UA1 &ndash;> P1 (192.0.2.254:5060)</p>
+
+<p>   ACK sip:bob@[2001:db8::33] SIP/2.0
+   Route: &lt;sip:192.0.2.254:5060:lr>
+   Route: &lt;sip:[2001:db8::1];lr>
+   From: Alice &lt;sip:<a href="&#x6d;&#x61;&#x69;&#x6c;&#116;&#111;&#x3a;&#x61;&#x6c;&#105;&#x63;&#x65;&#64;&#97;&#x74;&#x6c;&#x61;&#110;&#116;&#97;&#46;&#x65;&#x78;&#x61;&#109;&#112;&#x6c;&#x65;&#x2e;&#99;&#x6f;&#109;">&#97;&#x6c;&#x69;&#99;&#x65;&#64;&#x61;&#116;&#x6c;&#97;&#110;&#x74;&#97;&#x2e;&#x65;&#x78;&#97;&#x6d;&#x70;&#108;&#101;&#x2e;&#x63;&#111;&#x6d;</a>>;tag=1234
+   To: Bob &lt;sip:<a href="&#109;&#x61;&#105;&#x6c;&#x74;&#111;&#x3a;&#98;&#x6f;&#x62;&#x40;&#98;&#105;&#108;&#x6f;&#x78;&#105;&#46;&#x65;&#x78;&#x61;&#x6d;&#x70;&#108;&#101;&#x2e;&#99;&#x6f;&#x6d;">&#98;&#x6f;&#x62;&#64;&#x62;&#105;&#x6c;&#111;&#x78;&#x69;&#x2e;&#101;&#120;&#x61;&#x6d;&#112;&#108;&#101;&#46;&#x63;&#x6f;&#109;</a>>;tag=4567</p>
+
+<pre><code>       F6 ACK P1 (2001:db8::1) -&gt; UA2
+
+       ACK sip:bob@[2001:db8::33] SIP/2.0
+       From: Alice &lt;sip:alice@atlanta.example.com&gt;;tag=1234
+       To: Bob &lt;sip:bob@biloxi.example.com&gt;;tag=4567
+       (both Route headers have been removed by the proxy)
+
+               F7 BYE UA2 -&gt; P1 (2001:db8::1)
+
+               BYE sip:alice@192.0.2.1 SIP/2.0
+               Route: &lt;sip:[2001:db8::1];lr&gt;
+               Route: &lt;sip:192.0.2.254:5060:lr&gt;
+               From: Bob &lt;sip:bob@biloxi.example.com&gt;;tag=4567
+               To: Alice &lt;sip:alice@atlanta.example.com&gt;;tag=1234
+
+
+       F8 BYE P1 (192.0.2.254:5060) -&gt; UA1
+
+       BYE sip:alice@192.0.2.1 SIP/2.0
+       From: Bob &lt;sip:bob@biloxi.example.com&gt;;tag=4567
+       To: Alice &lt;sip:alice@atlanta.example.com&gt;;tag=1234
+</code></pre>
+
+<p>```
+里面是用的ipv4和ipv6举的例子，不同网段或者transport的是类似的。</p>
+
+<h2>CSeq</h2>
+
+<p>这个表示了会话(session)内的消息的顺序，呼叫两侧的CSeq号是分别维护的。</p>
+
+<p>好了这篇到这告一段落了。其他的header比较简单了，可以查看RFC得到明确的意义。</p>
+]]></content>
+  </entry>
+  
+</feed>

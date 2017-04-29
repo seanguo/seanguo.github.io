@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Mac | Sean's Blog]]></title>
   <link href="http://www.seanguo.com/blog/categories/mac/atom.xml" rel="self"/>
   <link href="http://www.seanguo.com/"/>
-  <updated>2017-04-01T17:50:50+08:00</updated>
+  <updated>2017-04-29T22:54:44+08:00</updated>
   <id>http://www.seanguo.com/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -35,9 +35,9 @@
 <h3>第二步</h3>
 
 <p>创建可以自启动的Mac安装盘，用到的工具是<a href="https://www.tonymacx86.com/resources/unibeast-7-0-1.320/">UniBeast</a>。我在这一步卡壳了一下，因为手头没有16G以上的U盘，打算用手头的移动硬盘来作为启动盘，但是这就出问题了。按说明格式化好后打开UniBeast之后发现不了移动硬盘，google一下原来是新版的UniBeast不支持64GB以上的移动存储。wtf！只能把移动硬盘分区了，这块又有问题，Mac的磁盘工具的Partition按钮不可用，继续google吧，这次找到了Mac下面这个命令来解决：
-{% codeblock lang:bash%}
-diskutil partitionDisk disk2 1 GPT HFS+ newdisk R
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>diskutil partitionDisk disk2 1 GPT HFS+ newdisk R
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 这里要注意disk2是你的移动硬盘。
 然后下面顺利分了两个区，这个启动的区设为了64GB。然后再次启动UniBeast一路continue安装好了启动盘。</p>
 
@@ -48,16 +48,23 @@ diskutil partitionDisk disk2 1 GPT HFS+ newdisk R
 <h2>安装</h2>
 
 <p>重启按<strong>F8</strong>选择UEFI（和制作启动盘是Unibeast里的mode要要一致）的移动硬盘启动，黑屏白苹果进度条，成功进入安装界面这次没有Kernel Panic之类的错误，然后就是进入<strong>磁盘工具</strong>格式化分区，这块又是一个坑。<strong>磁盘工具</strong>报错没有空间来执行操作，继续google大法发现有人说是苹果的这个磁盘工具要求硬盘上必须有个>=200MB的EFI分区才行，wtf！而用windows分区出来的硬盘是没有那么大的EFI分区或者压根没有（可以用Windows的磁盘管理来查看目标磁盘有没有EFI分区）， 我的属于后者。继续google吧，发现了下面一个救命<a href="https://www.youtube.com/watch?v=Rqico9ENA-4">视频</a>，这个方法保持了不伤数据, 这个视频是在油管发现的，需要翻墙才能看，下面把里面的命令扒下来，具体来说就是没有EFI分区我可以用windows的磁盘工具创建一个出来：
-{% codeblock lang:bash%}
-diskpart
-list disk
-sel disk 1(你的目标磁盘号)
-list volumne
-sel vol 5（你的目标分区号）
-shrink desired=300（压缩这个分区300M来创建EFI分区）
-create partition efi size=300
-format quick fs=fat32 Label=&ldquo;System&rdquo;
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>diskpart
+</span><span class='line'>list disk
+</span><span class='line'>sel disk 1<span class="o">(</span>你的目标磁盘号<span class="o">)</span>
+</span><span class='line'>list volumne
+</span><span class='line'>sel vol 5（你的目标分区号）
+</span><span class='line'>shrink <span class="nv">desired</span><span class="o">=</span>300（压缩这个分区300M来创建EFI分区）
+</span><span class='line'>create partition efi <span class="nv">size</span><span class="o">=</span>300
+</span><span class='line'>format quick <span class="nv">fs</span><span class="o">=</span>fat32 <span class="nv">Label</span><span class="o">=</span>&amp;ldquo;System&amp;rdquo;
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 经过这个之后<strong>磁盘工具</strong>终于可以运行了，但是在这块儿我又碰到一个我指定的硬盘分区使用率为100%的问题（实际上是空的），但是有个分区确是好的，这块没有深究，把可用的磁盘中的文件拷贝过去，重启继续了安装在了好的分区。这次是顺利完成了安装，也成功进入了设置界面。</p>
 
 <h2>安装后</h2>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Chef | Sean's Blog]]></title>
   <link href="http://www.seanguo.com/blog/categories/chef/atom.xml" rel="self"/>
   <link href="http://www.seanguo.com/"/>
-  <updated>2017-04-01T17:50:50+08:00</updated>
+  <updated>2017-04-29T22:54:44+08:00</updated>
   <id>http://www.seanguo.com/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -27,191 +27,316 @@
 <p>我们知道Vagrant包含多种不同类型的provisioner，而Chef就是其中内置的一种，所以我们是可以直接使用的。这里我们用到的是chef_solo, Chef Solo是Chef Client的单机版，运行不依赖于Chef Server。</p>
 
 <p>第一步我们要下载我们需要安装的组件的cookbook，这里我们会用到第三方的cookbook，因为在<a href="https://supermarket.chef.io/cookbooks/">社区</a>里已经有很多成熟的cookbook了。但是手工下载的方式不太方便，这里我们用到cookbook的依赖管理的工具: <a href="https://docs.chef.io/berkshelf.html">Berkshelf</a>。它和Ruby的gem管理文件Gemfile语法类似，它的配置文件是Berksfile。我们在当前文件夹（我这里是<strong>vagrant_test</strong>）创建一个空的Berksfile。chef-dk里面已经包含Berkshelf的命令行工具了，对应的命令是<strong>berks</strong>, 但是Vagrant想要用Berkshelf的时候我们还要装个插件来实现，可以用下面的命令来安装最新Berkshelf的插件。
-{% codeblock lang:bash%}
-vagrant plugin install vagrant-berkshelf
-{% endcodeblock %}</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant plugin install vagrant-berkshelf
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>然后编辑Berksfile加上如下两行：
-{% codeblock lang:ruby%}
-source &lsquo;<a href="https://supermarket.chef.io">https://supermarket.chef.io</a>&rsquo;</p>
-
-<p>cookbook &lsquo;rails&rsquo;, &lsquo;~> 0.9.2&rsquo;
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;https://supermarket.chef.io&quot;</span><span class="o">&gt;</span><span class="ss">https</span><span class="p">:</span><span class="sr">//su</span><span class="n">permarket</span><span class="o">.</span><span class="n">chef</span><span class="o">.</span><span class="n">io</span><span class="o">&lt;</span><span class="sr">/a&gt;&amp;rsquo;&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">cookbook</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rails</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">0</span><span class="o">.</span><span class="mi">9</span><span class="o">.</span><span class="mi">2</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 source语句指定了去supermarket.chef.io搜索下载cookbook, 第二行声明我们依赖于一个叫rails的cookbook，version为0.9.2，关于version的语法可以<a href="https://docs.chef.io/config_rb_metadata.html#cookbook-version-constraints">戳这里</a>。</p>
 
 <p>我们接着创建一个新的Vagrantfile, 这里我们打算创建两个虚拟机，一个作为rails的主server，另一个用来安装mysql。我们先看第一台虚拟机的配置：
-{% codeblock lang:ruby%}</p>
-
-<h1>&ndash;<em>&ndash; mode: ruby &ndash;</em>&ndash;</h1>
-
-<h1>vi: set ft=ruby :</h1>
-
-<p>Vagrant.configure(&ldquo;2&rdquo;) do |config|</p>
-
-<p>  #base box for all machines
-  config.vm.box = &ldquo;bento/centos-6.7&rdquo;</p>
-
-<p>  #define a VM named rails
-  config.vm.define &ldquo;rails&rdquo; do |rails|</p>
-
-<pre><code>rails.vm.provider "virtualbox" do |v, override|
-  v.name           = "rails"
-  override.vm.network :private_network, ip: "192.168.50.20"
-end
-
-#configure chef provisoning per VM
-rails.vm.provision "shell", inline: "yum -y groupinstall 'Development Tools'"
-
-rails.vm.provision "chef_solo" do |chef|
-  chef.node_name = "rails"
-  chef.log_level = :debug
-  chef.json = {
-    "run_list" =&gt; ["rails"]
-  }
-end
-</code></pre>
-
-<p>  end
-end
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;&amp;ndash;&lt;em&gt;&amp;ndash; mode: ruby &amp;ndash;&lt;/em</span><span class="o">&gt;&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;vi: set ft=ruby :&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">2</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  #base box for all machines</span>
+</span><span class='line'><span class="sr">  config.vm.box = &amp;ldquo;bento/</span><span class="n">centos</span><span class="o">-</span><span class="mi">6</span><span class="o">.</span><span class="mi">7</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  #define a VM named rails</span>
+</span><span class='line'><span class="sr">  config.vm.define &amp;ldquo;rails&amp;rdquo; do |rails|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">v</span><span class="o">.</span><span class="n">name</span>           <span class="o">=</span> <span class="s2">&quot;rails&quot;</span>
+</span><span class='line'>  <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:private_network</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="s2">&quot;192.168.50.20&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#configure chef provisoning per VM</span>
+</span><span class='line'><span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;yum -y groupinstall &#39;Development Tools&#39;&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;chef_solo&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">chef</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">chef</span><span class="o">.</span><span class="n">node_name</span> <span class="o">=</span> <span class="s2">&quot;rails&quot;</span>
+</span><span class='line'>  <span class="n">chef</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="ss">:debug</span>
+</span><span class='line'>  <span class="n">chef</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;run_list&quot;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="o">[</span><span class="s2">&quot;rails&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 然后我们启动这台rails虚拟机，多虚拟机配置的启动需要指定虚拟机的名字，要不就是默认全部启动。
-{% codeblock lang:bash%}
-vagrant up rails
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant up rails
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 这块儿由于是第一次启动这个虚拟机，它会首先下载需要的cookbook，然后映射到虚拟机里，启动虚拟机之后会首先下载安装Chef，这个过程很耗时间。</p>
 
 <p>这里定义了两个provisioning，一个是用sh安装Rails依赖的开发工具包。另一个是利用rails这个cookbook来配置Rails的环境。
 我这块遇到了在墙内会超时的问题。科学上网后解决了但是还是很耗时间，主要是下载Chef的安装包费时间。我们可以在其装好了chef和dev tools之后把这个box存起来作为以后的base box。命令如下:
-{% codeblock lang:bash%}
-vagrant package &mdash;base rails
-vagrant box add mybase package.box
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant package &amp;mdash;base rails
+</span><span class='line'>vagrant box add mybase package.box
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 安装完box之后可以用下面的命令查看是否安装成功:
-{% codeblock lang:bash%}
-vagrant box list                <br/>
-bento/centos-6.7 (virtualbox, 2.2.7)
-mybase           (virtualbox, 0)
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant box list                &lt;br/&gt;
+</span><span class='line'>bento/centos-6.7 <span class="o">(</span>virtualbox, 2.2.7<span class="o">)</span>
+</span><span class='line'>mybase           <span class="o">(</span>virtualbox, 0<span class="o">)</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 以后就可以用mybase作为box的name来复用已经下载安装好Chef和dev tools的box。</p>
 
 <p>安装成功后我们可以用如下命令登录进去:
-{% codeblock lang:bash%}
-vagrant ssh rails
-{% endcodeblock %}</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant ssh rails
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>然后我们定义另外一个虚拟机用来安装mysql，这里我们取名为mysql:
-{% codeblock lang:ruby%}
-config.vm.define &ldquo;mysql&rdquo; do |mysql|</p>
-
-<pre><code>mysql.vm.provider "virtualbox" do |v, override|
-  v.name           = "mysql"
-  override.vm.network :private_network, ip: "192.168.50.21"
-end
-
-mysql.vm.provision "chef_solo" do |chef|
-  chef.node_name = "mysql"
-  chef.log_level = :debug
-  chef.json = {
-    "run_list" =&gt; ["vagrant_chef::mysql"]
-  }
-end
-</code></pre>
-
-<p> end
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">define</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">mysql</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span> <span class="k">do</span> <span class="o">|</span><span class="n">mysql</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;pre&gt;&lt;code&gt;mysql.vm.provider &quot;virtualbox&quot; do |v, override|</span>
+</span><span class='line'><span class="sr">  v.name           = &quot;mysql&quot;</span>
+</span><span class='line'><span class="sr">  override.vm.network :private_network, ip: &quot;192.168.50.21&quot;</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">mysql.vm.provision &quot;chef_solo&quot; do |chef|</span>
+</span><span class='line'><span class="sr">  chef.node_name = &quot;mysql&quot;</span>
+</span><span class='line'><span class="sr">  chef.log_level = :debug</span>
+</span><span class='line'><span class="sr">  chef.json = {</span>
+</span><span class='line'><span class="sr">    &quot;run_list&quot; =&amp;gt; [&quot;vagrant_chef::mysql&quot;]</span>
+</span><span class='line'><span class="sr">  }</span>
+</span><span class='line'><span class="sr">end</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">code</span><span class="o">&gt;&lt;</span><span class="sr">/pre&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt; end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 因为对这个cookbook的调用不能直接通过runlist，需要在recipe里调用它的resource来进行，我们需要把当前目录变成一个cookbook。一个cookbook的最小因素就是一个用来自描述的metadata.rb
-{% codeblock lang:ruby%}
-name             &ldquo;vagrant_chef&rdquo;
-maintainer       &ldquo;YOUR_NAME&rdquo;
-maintainer_email &ldquo;YOUR_EMAIL&rdquo;
-license          &ldquo;All rights reserved&rdquo;
-description      &ldquo;Installs/Configures mysql server&rdquo;
-version          &ldquo;0.0.1&rdquo;</p>
-
-<p>depends &ldquo;mysql&rdquo;
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">name</span>             <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="n">vagrant_chef</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">maintainer</span>       <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">YOUR_NAME</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">maintainer_email</span> <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">YOUR_EMAIL</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">license</span>          <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">All</span> <span class="n">rights</span> <span class="n">reserved</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">description</span>      <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="no">Installs</span><span class="o">/</span><span class="no">Configures</span> <span class="n">mysql</span> <span class="n">server</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span>
+</span><span class='line'><span class="n">version</span>          <span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;depends &amp;ldquo;mysql&amp;rdquo;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 这里我们还要加上对mysql的依赖，只有这样才能保证使用mysql的resource之前对mysql的依赖都全部被加载好。然后我们需要在Berksfile里指定mysql的cookbook版本，这样Berkshelf插件才会把这个新依赖的cookbook抓下来:
-{% codeblock lang:ruby%}
-source &lsquo;<a href="https://supermarket.chef.io">https://supermarket.chef.io</a>&rsquo;
-metadata</p>
-
-<p>cookbook &lsquo;rails&rsquo;, &lsquo;~> 0.9.2&rsquo;</p>
-
-<p>cookbook &lsquo;mysql&rsquo;, &lsquo;~> 8.2.0&rsquo;
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">source</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="n">a</span> <span class="n">href</span><span class="o">=</span><span class="s2">&quot;https://supermarket.chef.io&quot;</span><span class="o">&gt;</span><span class="ss">https</span><span class="p">:</span><span class="sr">//su</span><span class="n">permarket</span><span class="o">.</span><span class="n">chef</span><span class="o">.</span><span class="n">io</span><span class="o">&lt;</span><span class="sr">/a&gt;&amp;rsquo;</span>
+</span><span class='line'><span class="sr">metadata&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="n">cookbook</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">rails</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;,</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">~&gt;</span> <span class="mi">0</span><span class="o">.</span><span class="mi">9</span><span class="o">.</span><span class="mi">2</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;cookbook &amp;lsquo;mysql&amp;rsquo;, &amp;lsquo;~&gt; 8.2.0&amp;rsquo;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 我们还加上了一行metadata，表示我们解析当前目录的metadata.rb, 把当前这个cookbook也加载进来。然后我们创建一个receipes文件夹，创建一个mysql.rb:
-{% codeblock lang:ruby%}
-mysql_service &lsquo;mysql&rsquo; do
-  port &lsquo;3306&rsquo;
-  version &lsquo;5.5&rsquo;
-  initial_root_password &lsquo;change me&rsquo;
-  action [:create, :start]
-end
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">mysql_service</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">mysql</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">port</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mi">3306</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">version</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mi">5</span><span class="o">.</span><span class="mi">5</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">initial_root_password</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">change</span> <span class="n">me</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">action</span> <span class="o">[</span><span class="ss">:create</span><span class="p">,</span> <span class="ss">:start</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 这个Recipe用来安装设置mysql， 可以看到上面我们中对虚拟机的provisioning的配置里可以通过把<strong>vagrant_chef::mysql</strong>加到runlist来实现对这个Recipe的调用。
 所有都做好我们可以调用
-{% codeblock lang:bash%}
-vagrant up mysql
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>vagrant up mysql
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 这样mysql这个虚拟机也会被创建设置好。</p>
 
 <p>本来就想写个vagrant+chef的教程，结果大部分时间花在调试这两个别人写的cookbook。终于还是放弃了，所以这个教程的Chef安装部分是跑不起来的，仅供参考。但是其中你也能学到多个虚拟机的配置，组网，如何在Vagrant使用Chef, Berkshelf这些东西。</p>
 
 <p>完整的Vagrantfile如下：</p>
 
-<p>{% codeblock lang:ruby%}</p>
-
-<h1>&ndash;<em>&ndash; mode: ruby &ndash;</em>&ndash;</h1>
-
-<h1>vi: set ft=ruby :</h1>
-
-<p>Vagrant.configure(&ldquo;2&rdquo;) do |config|</p>
-
-<p>  #base box for all machines
-  config.vm.box = &ldquo;bento/centos-6.7&rdquo;</p>
-
-<p>  #define a VM named rails
-  config.vm.define &ldquo;rails&rdquo; do |rails|</p>
-
-<pre><code>rails.vm.provider "virtualbox" do |v, override|
-  v.name           = "rails"
-  override.vm.network :private_network, ip: "192.168.50.20"
-end
-
-#configure chef provisoning per VM
-rails.vm.provision "shell", inline: "yum -y groupinstall 'Development Tools'"
-
-rails.vm.provision "chef_solo" do |chef|
-  chef.node_name = "rails"
-  chef.log_level = :debug
-  chef.json = {
-    "run_list" =&gt; ["rails"]
-  }
-end
-</code></pre>
-
-<p>  end</p>
-
-<p>  config.vm.define &ldquo;mysql&rdquo; do |mysql|</p>
-
-<pre><code>mysql.vm.provider "virtualbox" do |v, override|
-  v.name           = "mysql"
-  override.vm.network :private_network, ip: "192.168.50.21"
-end
-
-mysql.vm.provision "chef_solo" do |chef|
-  chef.node_name = "mysql"
-  chef.log_level = :debug
-  chef.json = {
-    "run_list" =&gt; ["vagrant_chef::mysql"]
-  }
-end
-</code></pre>
-
-<p>  end
-end</p>
-
-<p>{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;&amp;ndash;&lt;em&gt;&amp;ndash; mode: ruby &amp;ndash;&lt;/em</span><span class="o">&gt;&amp;</span><span class="n">ndash</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/h1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;h1&gt;vi: set ft=ruby :&lt;/</span><span class="n">h1</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Vagrant</span><span class="o">.</span><span class="n">configure</span><span class="p">(</span><span class="o">&amp;</span><span class="n">ldquo</span><span class="p">;</span><span class="mi">2</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;)</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  #base box for all machines</span>
+</span><span class='line'><span class="sr">  config.vm.box = &amp;ldquo;bento/</span><span class="n">centos</span><span class="o">-</span><span class="mi">6</span><span class="o">.</span><span class="mi">7</span><span class="o">&amp;</span><span class="n">rdquo</span><span class="p">;</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  #define a VM named rails</span>
+</span><span class='line'><span class="sr">  config.vm.define &amp;ldquo;rails&amp;rdquo; do |rails|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">v</span><span class="o">.</span><span class="n">name</span>           <span class="o">=</span> <span class="s2">&quot;rails&quot;</span>
+</span><span class='line'>  <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:private_network</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="s2">&quot;192.168.50.20&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#configure chef provisoning per VM</span>
+</span><span class='line'><span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;shell&quot;</span><span class="p">,</span> <span class="ss">inline</span><span class="p">:</span> <span class="s2">&quot;yum -y groupinstall &#39;Development Tools&#39;&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">rails</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;chef_solo&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">chef</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">chef</span><span class="o">.</span><span class="n">node_name</span> <span class="o">=</span> <span class="s2">&quot;rails&quot;</span>
+</span><span class='line'>  <span class="n">chef</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="ss">:debug</span>
+</span><span class='line'>  <span class="n">chef</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;run_list&quot;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="o">[</span><span class="s2">&quot;rails&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;  config.vm.define &amp;ldquo;mysql&amp;rdquo; do |mysql|&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">pre</span><span class="o">&gt;&lt;</span><span class="n">code</span><span class="o">&gt;</span><span class="n">mysql</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provider</span> <span class="s2">&quot;virtualbox&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">v</span><span class="p">,</span> <span class="n">override</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">v</span><span class="o">.</span><span class="n">name</span>           <span class="o">=</span> <span class="s2">&quot;mysql&quot;</span>
+</span><span class='line'>  <span class="n">override</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">network</span> <span class="ss">:private_network</span><span class="p">,</span> <span class="ss">ip</span><span class="p">:</span> <span class="s2">&quot;192.168.50.21&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">mysql</span><span class="o">.</span><span class="n">vm</span><span class="o">.</span><span class="n">provision</span> <span class="s2">&quot;chef_solo&quot;</span> <span class="k">do</span> <span class="o">|</span><span class="n">chef</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">chef</span><span class="o">.</span><span class="n">node_name</span> <span class="o">=</span> <span class="s2">&quot;mysql&quot;</span>
+</span><span class='line'>  <span class="n">chef</span><span class="o">.</span><span class="n">log_level</span> <span class="o">=</span> <span class="ss">:debug</span>
+</span><span class='line'>  <span class="n">chef</span><span class="o">.</span><span class="n">json</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s2">&quot;run_list&quot;</span> <span class="o">=&amp;</span><span class="n">gt</span><span class="p">;</span> <span class="o">[</span><span class="s2">&quot;vagrant_chef::mysql&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sr">/code&gt;&lt;/</span><span class="n">pre</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;p&gt;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
   
@@ -233,133 +358,202 @@ end</p>
 <p>Chef安装很简单，就去下载一个叫做<a href="https://downloads.chef.io/">Chef DK</a>的包安装就可以了。这个会把Chef全家桶装好，里面开发测试用的所有工具都包含了。</p>
 
 <p>安装完后可以运行下面的命令检查一下
-{% codeblock lang:bash%}
-➜  ~ chef-solo -v
-Chef: 12.17.44
-{% endcodeblock %}</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>➜  ~ chef-solo -v
+</span><span class='line'>Chef: 12.17.44
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <h2>第一个程序</h2>
 
 <p>我们可以通过下面的命令来创建我们的第一个Chef程序(它叫Cookbook)
-{% codeblock lang:ruby%}
-chef generate cookbook sample1
-{% endcodeblock %}</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">chef</span> <span class="n">generate</span> <span class="n">cookbook</span> <span class="n">sample1</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>下面是这个cookbook的目录结构:
-{% codeblock lang:bash%}
-.
-├── Berksfile
-├── README.md
-├── chefignore
-├── metadata.rb
-├── recipes
-│   └── default.rb
-├── spec
-│   ├── spec_helper.rb
-│   └── unit
-│       └── recipes
-│           └── default_spec.rb
-├── test
-│   └── smoke
-│       └── default
-│           └── default_test.rb</p>
-
-<p>{% endcodeblock %}</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>.
+</span><span class='line'>├── Berksfile
+</span><span class='line'>├── README.md
+</span><span class='line'>├── chefignore
+</span><span class='line'>├── metadata.rb
+</span><span class='line'>├── recipes
+</span><span class='line'>│   └── default.rb
+</span><span class='line'>├── spec
+</span><span class='line'>│   ├── spec_helper.rb
+</span><span class='line'>│   └── unit
+</span><span class='line'>│       └── recipes
+</span><span class='line'>│           └── default_spec.rb
+</span><span class='line'>├── <span class="nb">test</span>
+</span><span class='line'>│   └── smoke
+</span><span class='line'>│       └── default
+</span><span class='line'>│           └── default_test.rb&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>简单来说Chef的运行是顺序执行一个一个的Resource，Chef在Ruby语法的基础上封装了自己的DSL来把经常用到的命令，配置文件的管理等抽象成一个个的Resource。这些Resource根据需求顺序放在Chef的脚本里（它叫Recipe）就可以执行了。所以Chef的入口是Recipe，下面是一个简单的例子。</p>
 
-<p>{% codeblock lang:ruby%}
-file &lsquo;/tmp/test.txt&rsquo; do
-  content &lsquo;This is myfirst sample&rsquo;
-  mode &lsquo;0755&rsquo;
-end
-{% endcodeblock %}</p>
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">file</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="nb">test</span><span class="o">.</span><span class="n">txt</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">content</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">This</span> <span class="n">is</span> <span class="n">myfirst</span> <span class="n">sample</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">mode</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mo">0755</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>这个主代码块我们要放到recipes/default.rb里</p>
 
 <p>像这个file Resource就会在制定的路径创建一个php文件，然后填充文件的内容，设置用户和组，然后还有权限。简单而直观，没有Ruby的背景也能够轻易理解。
 要写在本地运行起来，我们还要创建两个文件：
-{% codeblock lang:bash%}
-cat ~/.chef/solo.rb
-cookbook_path [&lsquo;~/blog_samples/chef_intro/&rsquo;]%
-{% endcodeblock %}
-{% codeblock lang:bash%}
-cat test.json
-{
-&ldquo;run_list&rdquo;:[&ldquo;sample1&rdquo;]
-}
-{% endcodeblock %}</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cat ~/.chef/solo.rb
+</span><span class='line'>cookbook_path <span class="o">[</span>&amp;lsquo;~/blog_samples/chef_intro/&amp;rsquo;<span class="o">]</span>%
+</span></code></pre></td></tr></table></div></figure></notextile></div>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cat test.json
+</span><span class='line'><span class="o">{</span>
+</span><span class='line'>&amp;ldquo;run_list&amp;rdquo;:<span class="o">[</span>&amp;ldquo;sample1&amp;rdquo;<span class="o">]</span>
+</span><span class='line'><span class="o">}</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>然后可以用下面的命令在本地来运行这个cookbook:
-{% codeblock lang:bash%}
-chef-solo -j test.json -c ~/.chef/solo.rb
-{% endcodeblock %}</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>chef-solo -j test.json -c ~/.chef/solo.rb
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>然后我们看到了如下的输出
-{% codeblock lang:bash%}
-Starting Chef Client, version 12.17.44
-resolving cookbooks for run list: [&ldquo;sample1&rdquo;]
-Synchronizing Cookbooks:
-  &ndash; sample1 (0.1.0)
-Installing Cookbook Gems:
-Compiling Cookbooks&hellip;
-Converging 1 resources
-Recipe: sample1::default
-  * file[/tmp/test.txt] action create</p>
-
-<pre><code>- create new file /tmp/test.txt
-- update content in file /tmp/test.txt from none to ea8447
---- /tmp/test.txt   2017-02-23 21:20:46.000000000 +0800
-+++ /tmp/.chef-test20170223-2804-c8bnol.txt 2017-02-23 21:20:46.000000000 +0800
-@@ -1 +1,2 @@
-+This is myfirst sample
-- change mode from '' to '0755'
-</code></pre>
-
-<p>Running handlers:
-Running handlers complete
-Chef Client finished, 1/1 resources updated in 12 seconds
-{% endcodeblock %}</p>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>Starting Chef Client, version 12.17.44
+</span><span class='line'>resolving cookbooks <span class="k">for </span>run list: <span class="o">[</span>&amp;ldquo;sample1&amp;rdquo;<span class="o">]</span>
+</span><span class='line'>Synchronizing Cookbooks:
+</span><span class='line'>  &amp;ndash; sample1 <span class="o">(</span>0.1.0<span class="o">)</span>
+</span><span class='line'>Installing Cookbook Gems:
+</span><span class='line'>Compiling Cookbooks&amp;hellip;
+</span><span class='line'>Converging 1 resources
+</span><span class='line'>Recipe: sample1::default
+</span><span class='line'>  * file<span class="o">[</span>/tmp/test.txt<span class="o">]</span> action create&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;- create new file /tmp/test.txt
+</span><span class='line'>- update content in file /tmp/test.txt from none to ea8447
+</span><span class='line'>--- /tmp/test.txt   2017-02-23 21:20:46.000000000 +0800
+</span><span class='line'>+++ /tmp/.chef-test20170223-2804-c8bnol.txt 2017-02-23 21:20:46.000000000 +0800
+</span><span class='line'>@@ -1 +1,2 @@
+</span><span class='line'>+This is myfirst sample
+</span><span class='line'>- change mode from <span class="s1">&#39;&#39;</span> to <span class="s1">&#39;0755&#39;</span>
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;Running handlers:
+</span><span class='line'>Running handlers <span class="nb">complete</span>
+</span><span class='line'>Chef Client finished, 1/1 resources updated in 12 seconds
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 
 <p>这表示成功执行完了，可以到那个地方检查一下这个文件是否被创建了。
-{% codeblock lang:bash%}
-cat /tmp/test.txt
-This is myfirst sample
-{% endcodeblock %}   <br/>
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'>cat /tmp/test.txt
+</span><span class='line'>This is myfirst sample
+</span></code></pre></td></tr></table></div></figure></notextile></div>   <br/>
 到这之后然后可能会想要修改文件的mode， 这可以通过Attribute来实现。</p>
 
-<p>{% codeblock lang:ruby%}
-file &lsquo;/tmp/test.txt&rsquo; do
-  content &lsquo;This is myfirst sample&rsquo;
-  mode node[&lsquo;chef_intro&rsquo;][&lsquo;sample1&rsquo;][&lsquo;file_mode&rsquo;]
-end
-{% endcodeblock %}
+<p><div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">file</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="nb">test</span><span class="o">.</span><span class="n">txt</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">content</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="no">This</span> <span class="n">is</span> <span class="n">myfirst</span> <span class="n">sample</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">mode</span> <span class="n">node</span><span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">chef_intro</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">][&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">sample1</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">][&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">file_mode</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 这些Attribute是在另一个Ruby文件（attributes/default.rb）定义的：
-{% codeblock lang:ruby%}
-  default[&lsquo;chef_intro&rsquo;][&lsquo;sample1&rsquo;][&lsquo;file_mode&rsquo;] = &lsquo;755&rsquo;
-{% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="n">default</span><span class="o">[&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">chef_intro</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">][&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">sample1</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">][&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="n">file_mode</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span><span class="o">]</span> <span class="o">=</span> <span class="o">&amp;</span><span class="n">lsquo</span><span class="p">;</span><span class="mi">755</span><span class="o">&amp;</span><span class="n">rsquo</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
 然后修改我们的用户配置test.json为:
-{% codeblock lang:bash%}
-{
-  &ldquo;run_list&rdquo;:[&ldquo;sample1&rdquo;],
-  &ldquo;chef_intro&rdquo;: {</p>
-
-<pre><code>"sample1": {
-    "file_mode": "644"
-}
-</code></pre>
-
-<p>  }
- {% endcodeblock %}
+<div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="o">{</span>
+</span><span class='line'>  &amp;ldquo;run_list&amp;rdquo;:<span class="o">[</span>&amp;ldquo;sample1&amp;rdquo;<span class="o">]</span>,
+</span><span class='line'>  &amp;ldquo;chef_intro&amp;rdquo;: <span class="o">{</span>&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;<span class="s2">&quot;sample1&quot;</span>: <span class="o">{</span>
+</span><span class='line'>    <span class="s2">&quot;file_mode&quot;</span>: <span class="s2">&quot;644&quot;</span>
+</span><span class='line'><span class="o">}</span>
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;  <span class="o">}</span>
+</span><span class='line'>
+</span></code></pre></td></tr></table></div></figure></notextile></div>
  再次运行这个cookbook可以看到输出已经把文件的mode改成644了，通过这种方式我们就可以通过从外面的配置覆盖cookbook的默认值，达到定制化配置的目的。
- {% codeblock lang:bash%}
- Recipe: sample1::default
-  * file[/tmp/test.txt] action create</p>
-
-<pre><code>- change mode from '0755' to '0644'
-</code></pre>
-
-<p> {% endcodeblock %}</p>
+ <div class='bogus-wrapper'><notextile><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'> Recipe: sample1::default
+</span><span class='line'>  * file<span class="o">[</span>/tmp/test.txt<span class="o">]</span> action create&lt;/p&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;pre&gt;&lt;code&gt;- change mode from <span class="s1">&#39;0755&#39;</span> to <span class="s1">&#39;0644&#39;</span>
+</span><span class='line'>&lt;/code&gt;&lt;/pre&gt;
+</span><span class='line'>
+</span><span class='line'>&lt;p&gt;
+</span></code></pre></td></tr></table></div></figure></notextile></div></p>
 ]]></content>
   </entry>
   
