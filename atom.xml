@@ -4,7 +4,7 @@
   <title><![CDATA[Sean's Blog]]></title>
   <link href="http://www.seanguo.com/atom.xml" rel="self"/>
   <link href="http://www.seanguo.com/"/>
-  <updated>2017-04-29T22:54:44+08:00</updated>
+  <updated>2017-05-28T21:03:34+08:00</updated>
   <id>http://www.seanguo.com/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
@@ -12,6 +12,203 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Shell+Ruby]]></title>
+    <link href="http://www.seanguo.com/blog/2017/05/28/shell-plus-ruby/"/>
+    <updated>2017-05-28T20:25:34+08:00</updated>
+    <id>http://www.seanguo.com/blog/2017/05/28/shell-plus-ruby</id>
+    <content type="html"><![CDATA[<p>最近公司产品的新特性开发的不是那么多了，所以自己有时间闲下来偿还一下以前欠下的技术债。公司的发版流程是自己一步步实现出来的，整体结构是由一个个的shell脚本来实现的。把发版的每一个步骤拆分为独立的一个个脚本，这样流程变化了可以通过脚本组合的变化来适应变化。毕竟能够维持不变的东西永远是<strong>变化</strong>。</p>
+
+<p>以前的问题是由于当时开发的紧迫性，加上自己对脚本的不太重视，导致开发的这些脚本整体结构还算好，但是就是里面会有很多重复的常量在里面。这里的常量就是要发版的各个组件的名字，由于目前产品组件的不确定性，经常会添加或者删除一个组件，目前的缺点就是添加或者删除一个组件的时候需要更改多个脚本，违背了SPOT原则，会很容易遗落下本应同步修改的脚本。</p>
+
+<p>这次自己有时间了决定把这些常量提取出去作为一个配置文件单独存在，思路是简单而直接的，但是由于shell脚本的局限性，把组件名字提出去还算可行，但是我想要对每个组件加上单独的其他配置的话好像比较绕。以以下脚本为例来说：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="k">for </span>repo in <span class="s2">&quot;COM_A COM_B COM_C&quot;</span>
+</span><span class='line'><span class="k">do</span>
+</span><span class='line'><span class="k">  </span><span class="nb">cd</span> <span class="nv">$repo</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$repo</span> <span class="o">==</span> <span class="s2">&quot;COM_B&quot;</span>
+</span><span class='line'>    <span class="nb">cd </span>modules
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="k">  </span>mvn <span class="nv">setVersion</span><span class="o">=</span><span class="nv">$newVersion</span>
+</span><span class='line'><span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这个脚本是迭代每个组件，然后去修改pom.xml里面的version改为要发版的version，问题有的组件的parent的pom.xml没在根目录下，需要切换到对应的目录才能进行操作。</p>
+
+<p>我们可以很容易就把 &ldquo;COM_A COM_B COM_C&rdquo; 提取出去， 例如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">export </span><span class="nv">all_repos</span><span class="o">=</span><span class="s2">&quot;COM_A COM_B COM_C&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样脚本就变成了</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="k">for </span>repo in <span class="nv">$all_repos</span>
+</span><span class='line'><span class="k">do</span>
+</span><span class='line'><span class="k">  </span><span class="nb">cd</span> <span class="nv">$repo</span>
+</span><span class='line'>  <span class="k">if</span> <span class="o">[</span> <span class="nv">$repo</span> <span class="o">==</span> <span class="s2">&quot;oneRepo&quot;</span>
+</span><span class='line'>    <span class="nb">cd </span>modules
+</span><span class='line'>  <span class="k">fi</span>
+</span><span class='line'><span class="k">  </span>mvn versions:set -DnewVersion<span class="o">=</span><span class="nv">$newVersion</span>
+</span><span class='line'><span class="k">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>问题是这个modules目录怎么配置出去，想过这样去做：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='bash'><span class='line'><span class="nb">export </span><span class="nv">COM_B_pom_path</span><span class="o">=</span>modules
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是问题是这只是一个配置而已，因为发版流程还涉及到其他的目录，像我们的组件用的Chef的cookbook来配置安装，所以我还要配置这个cookbook的路径，然后我们的cookbook用的test kitchen来测试，所以还要配置test kitchen的测试文件所在的路径，这样会有很多export，可读性和可维护性都很差。</p>
+
+<p>根据以往的经验，所有复杂的问题理论上都可以经过抽象或者添加中间层的方式来简化实现。这里我想到了用Ruby来生成shell需要的export全局变量，然后既然用到Ruby了很自然的配置文件就用到了YAML。这种配置文件既简洁又保持了很好的可读性。下面就是就是yaml关于这次修改的部分样例：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">---</span>
+</span><span class='line'><span class="n">components</span>
+</span><span class='line'>  <span class="no">COM_A</span>
+</span><span class='line'>      <span class="ss">pom</span><span class="p">:</span> <span class="sr">/</span>
+</span><span class='line'><span class="sr">     cookbook: cookbook</span>
+</span><span class='line'><span class="sr">     test_kitchen: /</span>
+</span><span class='line'>  <span class="no">COM_B</span>
+</span><span class='line'>    <span class="ss">pom</span><span class="p">:</span> <span class="n">modules</span>
+</span><span class='line'>    <span class="ss">cookbook</span><span class="p">:</span> <span class="n">cookbook</span>
+</span><span class='line'>      <span class="n">test_kitchen</span><span class="p">:</span> <span class="sr">/</span>
+</span><span class='line'><span class="sr">  COM_C</span>
+</span><span class='line'><span class="sr">     pom: /</span>
+</span><span class='line'>      <span class="ss">cookbook</span><span class="p">:</span> <span class="n">cookbook</span>
+</span><span class='line'>      <span class="n">test_kitchen</span><span class="p">:</span> <span class="sr">/</span>
+</span><span class='line'><span class="sr">...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这样我们可以很容易的实现一段Ruby代码来生成这个shell的环境文件：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">require &quot;yaml&quot;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">def all_repo_list(yaml)</span>
+</span><span class='line'><span class="err">    </span><span class="l-Scalar-Plain">return yaml.keys.join(&quot; &quot;)</span>
+</span><span class='line'><span class="l-Scalar-Plain">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">def all_cookbook_dirs(yaml)</span>
+</span><span class='line'><span class="err">    </span><span class="l-Scalar-Plain">all_dir_for(yaml, &quot;cookbook&quot;)</span>
+</span><span class='line'><span class="l-Scalar-Plain">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">def all_pom_dirs(yaml)</span>
+</span><span class='line'><span class="err">    </span><span class="l-Scalar-Plain">all_dir_for(yaml, &quot;pom&quot;)</span>
+</span><span class='line'><span class="l-Scalar-Plain">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">def all_test_kitchen_dirs(yaml)</span>
+</span><span class='line'><span class="err">    </span><span class="l-Scalar-Plain">all_dir_for(yaml, &quot;test_kitchen&quot;)</span>
+</span><span class='line'><span class="l-Scalar-Plain">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">def all_dir_for(yaml, type)</span>
+</span><span class='line'><span class="err">    </span><span class="l-Scalar-Plain">dirs = []</span>
+</span><span class='line'><span class="err">    </span><span class="l-Scalar-Plain">yaml.each do |k, v|</span>
+</span><span class='line'><span class="err">        </span><span class="l-Scalar-Plain">next if v.nil? || v[type].nil?</span>
+</span><span class='line'><span class="err">        </span><span class="l-Scalar-Plain">subfolder = v[type]</span>
+</span><span class='line'><span class="err">        </span><span class="l-Scalar-Plain">dirs &lt;&lt; &quot;#{k}#{subfolder}&quot;</span>
+</span><span class='line'><span class="err">    </span><span class="l-Scalar-Plain">end</span>
+</span><span class='line'><span class="err">    </span><span class="l-Scalar-Plain">dirs.join(&quot; &quot;)</span>
+</span><span class='line'><span class="l-Scalar-Plain">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">current_dir = File.dirname(__FILE__)</span>
+</span><span class='line'><span class="l-Scalar-Plain">yaml = YAML.load_file(&quot;#{current_dir}/config.yml&quot;)</span>
+</span><span class='line'><span class="l-Scalar-Plain">all_components = yaml[&quot;components&quot;]</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">text = []</span>
+</span><span class='line'><span class="l-Scalar-Plain">text &lt;&lt; &quot;export all_repos=\&quot;#{all_repo_list(all_components)}\&quot;&quot;</span>
+</span><span class='line'><span class="l-Scalar-Plain">text &lt;&lt; &quot;export all_cookbook_dirs=\&quot;#{all_cookbook_dirs(all_components)}\&quot;&quot;</span>
+</span><span class='line'><span class="l-Scalar-Plain">text &lt;&lt; &quot;export all_pom_dirs=\&quot;#{all_pom_dirs(all_components)}\&quot;&quot;</span>
+</span><span class='line'><span class="l-Scalar-Plain">text &lt;&lt; &quot;export all_test_kitchen_dirs=\&quot;#{all_test_kitchen_dirs(all_components)}\&quot;&quot;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">File.open(&quot;#{current_dir}/config&quot;, &quot;w&quot;) {|file| file.write(text.join(&quot;\n&quot;)) }</span><span class="err"> </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然后在脚本执行前source一下这个生成的文件<strong>config</strong>即可。</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[SIP Headers]]></title>
