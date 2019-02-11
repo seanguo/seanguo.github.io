@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Vagrant | Sean's Blog]]></title>
-  <link href="http://www.seanguo.com/blog/categories/vagrant/atom.xml" rel="self"/>
-  <link href="http://www.seanguo.com/"/>
+  <link href="http://seanguo.github.io/blog/categories/vagrant/atom.xml" rel="self"/>
+  <link href="http://seanguo.github.io/"/>
   <updated>2017-05-28T21:03:34+08:00</updated>
-  <id>http://www.seanguo.com/</id>
+  <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Vagrant+Chef]]></title>
-    <link href="http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef/"/>
+    <link href="http://seanguo.github.io/blog/2017/03/12/vagrant-plus-chef/"/>
     <updated>2017-03-12T19:32:51+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef</id>
+    <id>http://seanguo.github.io/blog/2017/03/12/vagrant-plus-chef</id>
     <content type="html"><![CDATA[<h2>引言</h2>
 
 <p>前面我介绍了Chef的环境搭建和简单的cookbook的创建执行，也介绍了如果用Vagrant来快速搭建一台虚拟机。但是所有的东西都停留在hello world的阶段，这篇文章就是结合这两个生产力工具来搭建一组<del>可以实际使用</del>用来做rails开发的server。</p>
@@ -342,9 +342,9 @@ source语句指定了去supermarket.chef.io搜索下载cookbook, 第二行声明
   
   <entry>
     <title type="html"><![CDATA[Vagrant 入门]]></title>
-    <link href="http://www.seanguo.com/blog/2016/11/16/vagrant-ru-men/"/>
+    <link href="http://seanguo.github.io/blog/2016/11/16/vagrant-ru-men/"/>
     <updated>2016-11-16T11:48:43+08:00</updated>
-    <id>http://www.seanguo.com/blog/2016/11/16/vagrant-ru-men</id>
+    <id>http://seanguo.github.io/blog/2016/11/16/vagrant-ru-men</id>
     <content type="html"><![CDATA[<h2>介绍</h2>
 
 <p>Vagrant是一个虚拟机管理工具，通过它你可以用几个简单的命令快速搭建一个配置好的虚拟机环境。它提供了多种虚拟机provider所以你可以用同一个设置文件去驱动设置不同的虚拟机。<br><br>

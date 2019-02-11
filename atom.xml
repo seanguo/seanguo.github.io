@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Sean's Blog]]></title>
-  <link href="http://www.seanguo.com/atom.xml" rel="self"/>
-  <link href="http://www.seanguo.com/"/>
+  <link href="http://seanguo.github.io/atom.xml" rel="self"/>
+  <link href="http://seanguo.github.io/"/>
   <updated>2017-05-28T21:03:34+08:00</updated>
-  <id>http://www.seanguo.com/</id>
+  <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Shell+Ruby]]></title>
-    <link href="http://www.seanguo.com/blog/2017/05/28/shell-plus-ruby/"/>
+    <link href="http://seanguo.github.io/blog/2017/05/28/shell-plus-ruby/"/>
     <updated>2017-05-28T20:25:34+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/05/28/shell-plus-ruby</id>
+    <id>http://seanguo.github.io/blog/2017/05/28/shell-plus-ruby</id>
     <content type="html"><![CDATA[<p>最近公司产品的新特性开发的不是那么多了，所以自己有时间闲下来偿还一下以前欠下的技术债。公司的发版流程是自己一步步实现出来的，整体结构是由一个个的shell脚本来实现的。把发版的每一个步骤拆分为独立的一个个脚本，这样流程变化了可以通过脚本组合的变化来适应变化。毕竟能够维持不变的东西永远是<strong>变化</strong>。</p>
 
 <p>以前的问题是由于当时开发的紧迫性，加上自己对脚本的不太重视，导致开发的这些脚本整体结构还算好，但是就是里面会有很多重复的常量在里面。这里的常量就是要发版的各个组件的名字，由于目前产品组件的不确定性，经常会添加或者删除一个组件，目前的缺点就是添加或者删除一个组件的时候需要更改多个脚本，违背了SPOT原则，会很容易遗落下本应同步修改的脚本。</p>
@@ -212,9 +212,9 @@
   
   <entry>
     <title type="html"><![CDATA[SIP Headers]]></title>
-    <link href="http://www.seanguo.com/blog/2017/04/23/sip-headers/"/>
+    <link href="http://seanguo.github.io/blog/2017/04/23/sip-headers/"/>
     <updated>2017-04-23T19:45:06+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/04/23/sip-headers</id>
+    <id>http://seanguo.github.io/blog/2017/04/23/sip-headers</id>
     <content type="html"><![CDATA[<h2>引言</h2>
 
 <p>SIP协议的设计很多参考了已有的HTTP协议，例如都是用的文本，验证用户相关的header和content-type和body的设计。这里主要说一下SIP独有的这些header，其中对路由相关的header又是重点要说的。</p>
@@ -597,9 +597,9 @@
   
   <entry>
     <title type="html"><![CDATA[Vagrant+Chef]]></title>
-    <link href="http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef/"/>
+    <link href="http://seanguo.github.io/blog/2017/03/12/vagrant-plus-chef/"/>
     <updated>2017-03-12T19:32:51+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef</id>
+    <id>http://seanguo.github.io/blog/2017/03/12/vagrant-plus-chef</id>
     <content type="html"><![CDATA[<h2>引言</h2>
 
 <p>前面我介绍了Chef的环境搭建和简单的cookbook的创建执行，也介绍了如果用Vagrant来快速搭建一台虚拟机。但是所有的东西都停留在hello world的阶段，这篇文章就是结合这两个生产力工具来搭建一组<del>可以实际使用</del>用来做rails开发的server。</p>
@@ -927,9 +927,9 @@
   
   <entry>
     <title type="html"><![CDATA[Chef 介绍 Part1 Setup]]></title>
-    <link href="http://www.seanguo.com/blog/2017/02/17/chefjie-shao/"/>
+    <link href="http://seanguo.github.io/blog/2017/02/17/chefjie-shao/"/>
     <updated>2017-02-17T20:20:59+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/02/17/chefjie-shao</id>
+    <id>http://seanguo.github.io/blog/2017/02/17/chefjie-shao</id>
     <content type="html"><![CDATA[<h2>引言</h2>
 
 <p>Chef是一个自动化部署的工具。它的思想是“Infrastructure as code”, 所以整个DevOps流程下来都是代码，都可以保存在代码仓库里面。像Chef之类的工具出现之前，简单部署的话就是手工来了，像Java的web应用手工部署个War包或者改个配置文件什么的，高级点的可能会写个shell脚本来自动化。但是当需要管理的机器增多或者配置项增多，或者不同的机器要求不一样的配置的话，就力不从心了。Chef出现之后，这样的难题就迎刃而解了。</p>
@@ -1156,9 +1156,9 @@
   
   <entry>
     <title type="html"><![CDATA[如何构建黑苹果(Hackintosh)]]></title>
-    <link href="http://www.seanguo.com/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh/"/>
+    <link href="http://seanguo.github.io/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh/"/>
     <updated>2017-01-17T20:55:12+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh</id>
+    <id>http://seanguo.github.io/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh</id>
     <content type="html"><![CDATA[<h2>引言</h2>
 
 <p>上大学的时候就想在PC上装个Mac操作系统来玩玩，因为已经观看了Windows安装的进度条多次，现在想要看看Mac怎么样。记得当时是想在虚拟机里装个Mac系统，但是停留在设置系统的部分，因为系统不能识别鼠标和键盘，只能作罢。
@@ -1224,9 +1224,9 @@
   
   <entry>
     <title type="html"><![CDATA[Vagrant 入门]]></title>
-    <link href="http://www.seanguo.com/blog/2016/11/16/vagrant-ru-men/"/>
+    <link href="http://seanguo.github.io/blog/2016/11/16/vagrant-ru-men/"/>
     <updated>2016-11-16T11:48:43+08:00</updated>
-    <id>http://www.seanguo.com/blog/2016/11/16/vagrant-ru-men</id>
+    <id>http://seanguo.github.io/blog/2016/11/16/vagrant-ru-men</id>
     <content type="html"><![CDATA[<h2>介绍</h2>
 
 <p>Vagrant是一个虚拟机管理工具，通过它你可以用几个简单的命令快速搭建一个配置好的虚拟机环境。它提供了多种虚拟机provider所以你可以用同一个设置文件去驱动设置不同的虚拟机。<br><br>
@@ -1796,9 +1796,9 @@
   
   <entry>
     <title type="html"><![CDATA[Itunes的备份之后的文件在哪儿]]></title>
-    <link href="http://www.seanguo.com/blog/2013/11/27/itunes-backup-location/"/>
+    <link href="http://seanguo.github.io/blog/2013/11/27/itunes-backup-location/"/>
     <updated>2013-11-27T19:46:51+08:00</updated>
-    <id>http://www.seanguo.com/blog/2013/11/27/itunes-backup-location</id>
+    <id>http://seanguo.github.io/blog/2013/11/27/itunes-backup-location</id>
     <content type="html"><![CDATA[<ul>
 <li><p><strong>Windows 7</strong>的在 C:/Users/[用户名]/AppData/Roaming/Apple Computer/MobileSync/Backup/</p></li>
 <li><p><strong>Windows XP</strong>: C:/Documents and Settings(用户名)/Application Data/Apple Computer/MobileSync/Backup</p></li>
@@ -1810,9 +1810,9 @@
   
   <entry>
     <title type="html"><![CDATA[NoSql Database Compare]]></title>
-    <link href="http://www.seanguo.com/blog/2013/11/27/nosql-database-compare/"/>
+    <link href="http://seanguo.github.io/blog/2013/11/27/nosql-database-compare/"/>
     <updated>2013-11-27T16:47:57+08:00</updated>
-    <id>http://www.seanguo.com/blog/2013/11/27/nosql-database-compare</id>
+    <id>http://seanguo.github.io/blog/2013/11/27/nosql-database-compare</id>
     <content type="html"><![CDATA[<h2>Introduction</h2>
 
 <p>The goal of this article is trying compare the popular NoSql databases and choose one for one of our company&rsquo;s product. It was based on SQL database but suffering from low scalibility and performance. So we want to migrate to NoSQL based product. Since Most of the NoSQL database are of high scalibility and performance under some condition.</p>
@@ -2912,9 +2912,9 @@ First, start the MongoDB server in one terminal:</p>
   
   <entry>
     <title type="html"><![CDATA[My Ruby Learning]]></title>
-    <link href="http://www.seanguo.com/blog/2013/11/27/my-ruby-learning/"/>
+    <link href="http://seanguo.github.io/blog/2013/11/27/my-ruby-learning/"/>
     <updated>2013-11-27T09:39:36+08:00</updated>
-    <id>http://www.seanguo.com/blog/2013/11/27/my-ruby-learning</id>
+    <id>http://seanguo.github.io/blog/2013/11/27/my-ruby-learning</id>
     <content type="html"><![CDATA[
 
 <figure class='code'><figcaption><span>Output something</span></figcaption>
@@ -2927,9 +2927,9 @@ First, start the MongoDB server in one terminal:</p>
   
   <entry>
     <title type="html"><![CDATA[Materials to Learn Chef]]></title>
-    <link href="http://www.seanguo.com/blog/2013/11/26/materials-to-learn-chef/"/>
+    <link href="http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef/"/>
     <updated>2013-11-26T20:57:31+08:00</updated>
-    <id>http://www.seanguo.com/blog/2013/11/26/materials-to-learn-chef</id>
+    <id>http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef</id>
     <content type="html"><![CDATA[<h2>Setup:</h2>
 
 <h3>Develop tool:</h3>
@@ -2993,9 +2993,9 @@ First, start the MongoDB server in one terminal:</p>
   
   <entry>
     <title type="html"><![CDATA[Hello World]]></title>
-    <link href="http://www.seanguo.com/blog/2013/11/26/hello-world/"/>
+    <link href="http://seanguo.github.io/blog/2013/11/26/hello-world/"/>
     <updated>2013-11-26T15:42:16+08:00</updated>
-    <id>http://www.seanguo.com/blog/2013/11/26/hello-world</id>
+    <id>http://seanguo.github.io/blog/2013/11/26/hello-world</id>
     <content type="html"><![CDATA[<p>Thanks <a href="http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/">http://zerodie.github.io/blog/2012/01/19/octopress-github-pages/</a> I got this blog system working.</p>
 ]]></content>
   </entry>

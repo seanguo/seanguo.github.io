@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Mac | Sean's Blog]]></title>
-  <link href="http://www.seanguo.com/blog/categories/mac/atom.xml" rel="self"/>
-  <link href="http://www.seanguo.com/"/>
+  <link href="http://seanguo.github.io/blog/categories/mac/atom.xml" rel="self"/>
+  <link href="http://seanguo.github.io/"/>
   <updated>2017-05-28T21:03:34+08:00</updated>
-  <id>http://www.seanguo.com/</id>
+  <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[如何构建黑苹果(Hackintosh)]]></title>
-    <link href="http://www.seanguo.com/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh/"/>
+    <link href="http://seanguo.github.io/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh/"/>
     <updated>2017-01-17T20:55:12+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh</id>
+    <id>http://seanguo.github.io/blog/2017/01/17/ru-he-gou-jian-hei-ping-guo-hackintosh</id>
     <content type="html"><![CDATA[<h2>引言</h2>
 
 <p>上大学的时候就想在PC上装个Mac操作系统来玩玩，因为已经观看了Windows安装的进度条多次，现在想要看看Mac怎么样。记得当时是想在虚拟机里装个Mac系统，但是停留在设置系统的部分，因为系统不能识别鼠标和键盘，只能作罢。

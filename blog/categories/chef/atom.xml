@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Chef | Sean's Blog]]></title>
-  <link href="http://www.seanguo.com/blog/categories/chef/atom.xml" rel="self"/>
-  <link href="http://www.seanguo.com/"/>
+  <link href="http://seanguo.github.io/blog/categories/chef/atom.xml" rel="self"/>
+  <link href="http://seanguo.github.io/"/>
   <updated>2017-05-28T21:03:34+08:00</updated>
-  <id>http://www.seanguo.com/</id>
+  <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Vagrant+Chef]]></title>
-    <link href="http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef/"/>
+    <link href="http://seanguo.github.io/blog/2017/03/12/vagrant-plus-chef/"/>
     <updated>2017-03-12T19:32:51+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/03/12/vagrant-plus-chef</id>
+    <id>http://seanguo.github.io/blog/2017/03/12/vagrant-plus-chef</id>
     <content type="html"><![CDATA[<h2>引言</h2>
 
 <p>前面我介绍了Chef的环境搭建和简单的cookbook的创建执行，也介绍了如果用Vagrant来快速搭建一台虚拟机。但是所有的东西都停留在hello world的阶段，这篇文章就是结合这两个生产力工具来搭建一组<del>可以实际使用</del>用来做rails开发的server。</p>
@@ -342,9 +342,9 @@ source语句指定了去supermarket.chef.io搜索下载cookbook, 第二行声明
   
   <entry>
     <title type="html"><![CDATA[Chef 介绍 Part1 Setup]]></title>
-    <link href="http://www.seanguo.com/blog/2017/02/17/chefjie-shao/"/>
+    <link href="http://seanguo.github.io/blog/2017/02/17/chefjie-shao/"/>
     <updated>2017-02-17T20:20:59+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/02/17/chefjie-shao</id>
+    <id>http://seanguo.github.io/blog/2017/02/17/chefjie-shao</id>
     <content type="html"><![CDATA[<h2>引言</h2>
 
 <p>Chef是一个自动化部署的工具。它的思想是“Infrastructure as code”, 所以整个DevOps流程下来都是代码，都可以保存在代码仓库里面。像Chef之类的工具出现之前，简单部署的话就是手工来了，像Java的web应用手工部署个War包或者改个配置文件什么的，高级点的可能会写个shell脚本来自动化。但是当需要管理的机器增多或者配置项增多，或者不同的机器要求不一样的配置的话，就力不从心了。Chef出现之后，这样的难题就迎刃而解了。</p>
@@ -559,9 +559,9 @@ source语句指定了去supermarket.chef.io搜索下载cookbook, 第二行声明
   
   <entry>
     <title type="html"><![CDATA[Materials to Learn Chef]]></title>
-    <link href="http://www.seanguo.com/blog/2013/11/26/materials-to-learn-chef/"/>
+    <link href="http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef/"/>
     <updated>2013-11-26T20:57:31+08:00</updated>
-    <id>http://www.seanguo.com/blog/2013/11/26/materials-to-learn-chef</id>
+    <id>http://seanguo.github.io/blog/2013/11/26/materials-to-learn-chef</id>
     <content type="html"><![CDATA[<h2>Setup:</h2>
 
 <h3>Develop tool:</h3>

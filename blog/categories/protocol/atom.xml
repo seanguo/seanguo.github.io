@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Category: Protocol | Sean's Blog]]></title>
-  <link href="http://www.seanguo.com/blog/categories/protocol/atom.xml" rel="self"/>
-  <link href="http://www.seanguo.com/"/>
+  <link href="http://seanguo.github.io/blog/categories/protocol/atom.xml" rel="self"/>
+  <link href="http://seanguo.github.io/"/>
   <updated>2017-05-28T21:03:34+08:00</updated>
-  <id>http://www.seanguo.com/</id>
+  <id>http://seanguo.github.io/</id>
   <author>
     <name><![CDATA[Sean Guo]]></name>
     <email><![CDATA[seanguo85@qq.com]]></email>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[SIP Headers]]></title>
-    <link href="http://www.seanguo.com/blog/2017/04/23/sip-headers/"/>
+    <link href="http://seanguo.github.io/blog/2017/04/23/sip-headers/"/>
     <updated>2017-04-23T19:45:06+08:00</updated>
-    <id>http://www.seanguo.com/blog/2017/04/23/sip-headers</id>
+    <id>http://seanguo.github.io/blog/2017/04/23/sip-headers</id>
     <content type="html"><![CDATA[<h2>引言</h2>
 
 <p>SIP协议的设计很多参考了已有的HTTP协议，例如都是用的文本，验证用户相关的header和content-type和body的设计。这里主要说一下SIP独有的这些header，其中对路由相关的header又是重点要说的。</p>
